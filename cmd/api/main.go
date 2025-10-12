@@ -27,18 +27,22 @@ func main() {
 	// Inisialisasi semua layer (Dependency Injection)
 	userRepository := repositories.NewUserRepository(db)
 	quizRepository := repositories.NewQuizRepository(db) 
+	educationRepository := repositories.NewEducationRepository(db)
 
 	authService := services.NewAuthService(userRepository)
 	quizService := services.NewQuizService(quizRepository)
+	educationService := services.NewEducationService(educationRepository)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	quizHandler := handlers.NewQuizHandler(quizService)
+	educationHandler := handlers.NewEducationHandler(educationService)
 
 	
 	// Mendaftarkan routes dari file terpisah
 	routes.SetupAuthRoutes(router, authHandler)
 	routes.SetupProtectedRoutes(router)
 	routes.SetupQuizRoutes(router, quizHandler)
+	routes.SetupEducationRoutes(router, educationHandler)
 	// Nanti kita akan panggil SetupProtectedRoutes di sini juga
 
 	// Simple health check route

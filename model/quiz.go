@@ -7,7 +7,7 @@ type Quiz struct {
 	Name      string    `gorm:"size:255;not null"`
 	Url       string    `gorm:"not null"`
 	CreatedBy uint      `gorm:"not null"`
-	User      User      `gorm:"foreignKey:CreatedBy"`
+	User      User      `gorm:"foreignKey:CreatedBy" json:"-"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

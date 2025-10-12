@@ -9,12 +9,12 @@ import (
 func SetupQuizRoutes(router *gin.Engine, quizHandler *handlers.QuizHandler) {
 	// Semua route kuis memerlukan login
 	quizRoutes := router.Group("/api/v1/quizzes")
+
 	quizRoutes.Use(middlewares.AuthMiddleware())
 	{
 		// Hanya user biasa & admin bisa melihat semua kuis
 		quizRoutes.GET("/", quizHandler.GetAll)
-		// quizRoutes.GET("/:id", quizHandler.GetByID)
-
+		quizRoutes.GET("/:id", quizHandler.GetByID)
 		// Hanya ADMIN yang bisa membuat, update, dan delete
 		adminRoutes := quizRoutes.Group("/")
 		adminRoutes.Use(middlewares.AdminMiddleware())

@@ -1,12 +1,13 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
-	"fmt"
 )
 
 func AuthMiddleware() gin.HandlerFunc {

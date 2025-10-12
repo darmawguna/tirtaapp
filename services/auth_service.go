@@ -8,7 +8,6 @@ import (
 	"github.com/darmawguna/tirtaapp.git/repositories"
 	"github.com/darmawguna/tirtaapp.git/utils"
 	"golang.org/x/crypto/bcrypt"
-	
 )
 
 type AuthService interface {
@@ -37,7 +36,7 @@ func (s *authService) Register(input dto.RegisterDTO) (models.User, error) {
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: string(hashedPassword),
-		Role:     "user", // Default role
+		Role:     input.Role, // Default role
 	}
 
 	// Simpan user ke database via repository

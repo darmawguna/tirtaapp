@@ -6,6 +6,7 @@ import (
 
 	"github.com/darmawguna/tirtaapp.git/dto"
 	"github.com/darmawguna/tirtaapp.git/services"
+	"github.com/darmawguna/tirtaapp.git/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,7 +27,8 @@ func (h *QuizHandler) Create(c *gin.Context) {
 
 	// Binding dan validasi request body.
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response := utils.ErrorResponse("Create Quiz failed", err.Error())
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
@@ -36,7 +38,8 @@ func (h *QuizHandler) Create(c *gin.Context) {
 	// Panggil service untuk membuat kuis.
 	quiz, err := h.quizService.Create(input, uint(userID))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create quiz"})
+		response := utils.ErrorResponse("Create Quiz failed", err.Error())
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
@@ -48,11 +51,13 @@ func (h *QuizHandler) Create(c *gin.Context) {
 func (h *QuizHandler) GetAll(c *gin.Context) {
 	quizzes, err := h.quizService.FindAll()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch quizzes"})
+		response := utils.ErrorResponse("Fetching Quiz failed", err.Error())
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	c.JSON(http.StatusOK, quizzes)
+	response := utils.SuccessResponse("Fetching Quiz successfully", quizzes)
+	c.JSON(http.StatusCreated, response)
 }
 
 // **GetByID** menangani pengambilan satu kuis berdasarkan ID.
@@ -61,18 +66,20 @@ func (h *QuizHandler) GetByID(c *gin.Context) {
 	// Ambil ID dari parameter URL.
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		response := utils.ErrorResponse("Fetching Quiz failed", err.Error())
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
 	quiz, err := h.quizService.FindByID(uint(id))
 	if err != nil {
 		// Jika record tidak ditemukan, GORM akan memberikan error.
-		c.JSON(http.StatusNotFound, gin.H{"error": "Quiz not found"})
+		response := utils.ErrorResponse("Fetching Quiz failed", err.Error())
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-
-	c.JSON(http.StatusOK, quiz)
+	response := utils.SuccessResponse("Fetching Quiz successfully", quiz)
+	c.JSON(http.StatusCreated, response)
 }
 
 // **Update** menangani pembaruan data kuis.
@@ -81,23 +88,28 @@ func (h *QuizHandler) Update(c *gin.Context) {
 	// Ambil ID dari parameter URL.
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		response := utils.ErrorResponse("Invalid ID format", err.Error())
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
 	var input dto.UpdateQuizDTO
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response := utils.ErrorResponse("Error Update", err.Error())
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
 	updatedQuiz, err := h.quizService.Update(uint(id), input)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update quiz"})
+		response := utils.ErrorResponse("Failed to update quiz", err.Error())
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	c.JSON(http.StatusOK, updatedQuiz)
+	response := utils.SuccessResponse("Fetching Quiz successfully", updatedQuiz)
+	c.JSON(http.StatusCreated, response)
+	
 }
 
 // **Delete** menangani penghapusan kuis.
@@ -106,14 +118,17 @@ func (h *QuizHandler) Delete(c *gin.Context) {
 	// Ambil ID dari parameter URL.
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
+		response := utils.ErrorResponse("Invalid ID format", err.Error())
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
 	if err := h.quizService.Delete(uint(id)); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete quiz"})
+		response := utils.ErrorResponse("Failed to delete quiz", err.Error())
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Quiz successfully deleted"})
+	response := utils.SuccessResponse("Quiz successfully deleted", struct{}{})
+	c.JSON(http.StatusCreated, response)
 }
