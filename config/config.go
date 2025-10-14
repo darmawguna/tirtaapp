@@ -8,7 +8,8 @@ import (
 
 // LoadConfig memuat konfigurasi dari file .env di root proyek.
 func LoadConfig() {
-	viper.AddConfigPath("../../") // Path ke direktori root dari main.go
+	// viper.AddConfigPath("../../") // Path ke direktori root dari main.go
+	viper.AddConfigPath(".") 
 	viper.SetConfigFile(".env")
 	viper.SetConfigType("env")
 
