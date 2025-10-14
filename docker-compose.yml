@@ -7,7 +7,7 @@ services:
     ports:
       - "127.0.0.1:8095:8080"
     env_file:
-      - .env
+      - ./.env
     # [TAMBAHAN] Memberitahu service ini untuk menunggu database siap terlebih dahulu
     depends_on:
       mysql-db:
