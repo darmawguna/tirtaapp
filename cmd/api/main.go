@@ -16,7 +16,6 @@ import (
 var db *gorm.DB
 
 func main() {
-	// Menjalankan migrasi
 	config.LoadConfig()
 	db = config.ConnectDB() // Koneksi setelah config dimuat
 	config.RunMigration(db)
