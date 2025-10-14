@@ -28,14 +28,17 @@ func main() {
 	userRepository := repositories.NewUserRepository(db)
 	quizRepository := repositories.NewQuizRepository(db) 
 	educationRepository := repositories.NewEducationRepository(db)
+	complaintRepository := repositories.NewComplaintRepository(db)
 
 	authService := services.NewAuthService(userRepository)
 	quizService := services.NewQuizService(quizRepository)
 	educationService := services.NewEducationService(educationRepository)
+	complaintService := services.NewComplaintService(complaintRepository)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	quizHandler := handlers.NewQuizHandler(quizService)
 	educationHandler := handlers.NewEducationHandler(educationService)
+	complaintHandler := handlers.NewComplaintHandler(complaintService)
 
 	
 	// Mendaftarkan routes dari file terpisah
@@ -43,7 +46,7 @@ func main() {
 	routes.SetupProtectedRoutes(router)
 	routes.SetupQuizRoutes(router, quizHandler)
 	routes.SetupEducationRoutes(router, educationHandler)
-	// Nanti kita akan panggil SetupProtectedRoutes di sini juga
+	routes.SetupComplaintRoutes(router, complaintHandler)
 
 	// Simple health check route
 	router.GET("/", func(c *gin.Context) {
