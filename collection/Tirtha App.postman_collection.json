@@ -238,6 +238,16 @@
 				{
 					"name": "Get Quiz",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -398,6 +408,102 @@
 							"path": [
 								"educations",
 								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Complaint",
+			"item": [
+				{
+					"name": "Create Complaint",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"complaints\": []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/complaints",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"complaints"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Complaints",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/complaints",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"complaints"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Complaint by Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/complaints/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"complaints",
+								""
 							]
 						}
 					},
