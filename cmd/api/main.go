@@ -22,7 +22,6 @@ func main() {
 
 	// Inisialisasi Gin router
 	router := gin.Default()
-
 	// Inisialisasi semua layer (Dependency Injection)
 	userRepository := repositories.NewUserRepository(db)
 	quizRepository := repositories.NewQuizRepository(db) 

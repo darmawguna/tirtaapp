@@ -11,21 +11,14 @@ func LoadConfig() {
 	viper.SetConfigFile(".env")
 	viper.SetConfigType("env")
 
-	// [PERBAIKAN] Kode ini memberitahu Viper untuk juga membaca dari environment variables.
-	// Ini penting agar variabel dari docker-compose bisa terbaca.
+	// Ini akan membuat Viper membaca variabel dari environment (seperti yang disuplai Docker)
 	viper.AutomaticEnv()
 
-	// [PERBAIKAN] Ubah cara kita membaca file.
-	// Kita coba baca file, tapi jika tidak ada, kita tidak akan crash.
-	if err := viper.ReadInConfig(); err != nil {
-		// Cek jika errornya adalah karena file tidak ditemukan
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// File konfigurasi tidak ditemukan; ini tidak apa-apa,
-			// kita akan mengandalkan environment variables.
-			log.Println("Config file (.env) not found, relying on environment variables.")
-		} else {
-			// Jika file ditemukan tapi ada error lain saat membacanya
-			log.Fatal("Error reading config file:", err)
-		}
+	// [PERBAIKAN FINAL] Coba baca file .env, tapi JANGAN crash jika tidak ada.
+	// Viper akan lanjut menggunakan environment variables dari AutomaticEnv() secara otomatis.
+	err := viper.ReadInConfig()
+	if err != nil {
+		// Cetak sebagai peringatan saja, bukan error fatal.
+		log.Println("Warning: Could not find or read .env file, relying on environment variables. Error:", err)
 	}
 }
