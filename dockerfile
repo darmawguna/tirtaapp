@@ -30,7 +30,6 @@ RUN groupadd --system nonroot && \
 WORKDIR /app
 
 COPY --from=builder /out/tirtapp-api /app/tirtapp-api
-COPY templates /app/templates
 
 RUN chown -R nonroot:nonroot /app
 
