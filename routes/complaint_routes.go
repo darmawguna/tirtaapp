@@ -15,5 +15,6 @@ func SetupComplaintRoutes(router *gin.Engine, complaintHandler *handlers.Complai
 		complaintRoutes.POST("/", complaintHandler.Create)
 		// Endpoint untuk melihat riwayat keluhan sendiri
 		complaintRoutes.GET("/", complaintHandler.GetMyComplaints) // <-- TAMBAHKAN INI
+		complaintRoutes.GET("/:id", complaintHandler.GetDetailComplaint)
 	}
 }

@@ -13,7 +13,7 @@ RUN --mount=type=cache,target=/go/pkg/mod go mod download
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
     CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
-    go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/tirtapp-api ./main.go
+    go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/tirtapp-api ./cmd/api/main.go
 
 
 # --- Stage 2: Final (Menggunakan Debian Slim) ---
