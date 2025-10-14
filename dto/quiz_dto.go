@@ -11,5 +11,3 @@ type UpdateQuizDTO struct {
 	Name string `json:"name" binding:"required"`
 	Url  string `json:"url" binding:"required,url"`
 }
-
-// TODO buat api response general untuk semua response api

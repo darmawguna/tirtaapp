@@ -9,7 +9,7 @@ import (
 
 // RunMigration menjalankan auto-migrasi GORM.
 func RunMigration(db *gorm.DB) {
-	err := db.AutoMigrate(&models.User{}, &models.Quiz{}, &models.Education{})
+	err := db.AutoMigrate(&models.User{}, &models.Quiz{}, &models.Education{}, &models.ComplaintLog{})
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
