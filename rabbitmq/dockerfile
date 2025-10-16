@@ -1,0 +1,10 @@
+# Gunakan image resmi RabbitMQ 3.13 dengan management plugin sebagai dasar
+FROM rabbitmq:3.13-management
+
+# Unduh file plugin delayed_message_exchange yang kompatibel dari GitHub
+# URL ini adalah URL rilis resmi untuk plugin tersebut
+RUN curl -L https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v3.13.0/rabbitmq_delayed_message_exchange-3.13.0.ez \
+    -o /plugins/rabbitmq_delayed_message_exchange-3.13.0.ez
+
+# Aktifkan plugin saat image ini dibangun
+RUN rabbitmq-plugins enable --offline rabbitmq_delayed_message_exchange

@@ -13,6 +13,9 @@ type DrugSchedule struct {
 	At12         bool      `gorm:"not null;default:false"`
 	At18         bool      `gorm:"not null;default:false"`
 	IsActive     bool      `gorm:"not null;default:true"`
+	At06Sent     bool      `gorm:"not null;default:false"`
+	At12Sent     bool      `gorm:"not null;default:false"`
+	At18Sent     bool      `gorm:"not null;default:false"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }

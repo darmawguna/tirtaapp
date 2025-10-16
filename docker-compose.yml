@@ -35,7 +35,24 @@ services:
       # Menyimpan data MySQL secara permanen di volume Docker
       - db-data:/var/lib/mysql
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: tirtapp-rabbitmq
+    ports:
+    # Port 5672 untuk komunikasi API/Worker
+    # Port 15672 untuk dashboard web (opsional, tapi sangat berguna)
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+    # Atur username dan password default untuk RabbitMQ
+    RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+    RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+  volumes:
+    # Menyimpan data RabbitMQ agar tidak hilang saat restart
+    - rabbitmq-data:/var/lib/rabbitmq/
+
 # --- Volume untuk persistensi data ---
 # Mendefinisikan volume yang akan digunakan oleh layanan di atas
 volumes:
   db-data:
+  rabbitmq-data:
