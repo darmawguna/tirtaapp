@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"log"
 
 	"github.com/darmawguna/tirtaapp.git/dto"
 	models "github.com/darmawguna/tirtaapp.git/model"
@@ -17,11 +18,12 @@ type AuthService interface {
 
 type authService struct {
 	userRepository repositories.UserRepository
+	deviceService    DeviceService
 }
 
 // NewAuthService membuat instance baru dari authService.
-func NewAuthService(userRepo repositories.UserRepository) AuthService {
-	return &authService{userRepository: userRepo}
+func NewAuthService(userRepo repositories.UserRepository, deviceService DeviceService) AuthService {
+	return &authService{userRepository: userRepo, deviceService: deviceService}
 }
 
 func (s *authService) Register(input dto.RegisterDTO) (models.User, error) {
@@ -37,6 +39,7 @@ func (s *authService) Register(input dto.RegisterDTO) (models.User, error) {
 		Email:    input.Email,
 		Password: string(hashedPassword),
 		Role:     input.Role, // Default role
+		Timezone: input.Timezone,
 	}
 
 	// Simpan user ke database via repository
@@ -60,6 +63,13 @@ func (s *authService) Login(input dto.LoginDTO) (string, error) {
 	if err != nil {
 		// Jika error (password tidak cocok)
 		return "", errors.New("invalid email or password")
+	}
+	
+	deviceDTO := dto.RegisterDeviceDTO{FCMToken: input.FCMToken}
+	_, err = s.deviceService.RegisterDevice(user.ID, deviceDTO)
+	if err != nil {
+		// Log error ini, tapi jangan sampai menggagalkan login
+		log.Printf("WARNING: Failed to register device for user %d: %v", user.ID, err)
 	}
 
 	// 3. Jika berhasil, generate JWT
