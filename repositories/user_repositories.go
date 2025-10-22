@@ -9,6 +9,7 @@ import (
 type UserRepository interface {
 	CreateUser(user models.User) (models.User, error)
 	FindByEmail(email string) (models.User, error) 
+	FindByID(id uint) (models.User, error) 
 }
 
 type userRepository struct {
@@ -32,6 +33,15 @@ func (r *userRepository) CreateUser(user models.User) (models.User, error) {
 func (r *userRepository) FindByEmail(email string) (models.User, error) {
 	var user models.User
 	err := r.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return models.User{}, err // GORM akan return ErrRecordNotFound jika tidak ada
+	}
+	return user, nil
+}
+
+func (r *userRepository) FindByID(id uint) (models.User, error) {
+	var user models.User
+	err := r.db.Where("id = ?", id).First(&user).Error
 	if err != nil {
 		return models.User{}, err // GORM akan return ErrRecordNotFound jika tidak ada
 	}

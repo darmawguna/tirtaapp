@@ -8,6 +8,7 @@ type User struct {
 	Email     string    `gorm:"size:255;not null;unique"`
 	Password  string    `gorm:"size:255;not null"`
 	Role      string    `gorm:"size:50;not null;default:'user' "`
+	Timezone  string    `gorm:"size:100;not null;default:'Asia/Makassar'"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

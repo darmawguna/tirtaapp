@@ -49,6 +49,7 @@
 									"if (response.token) {\r",
 									"    pm.environment.set(\"token_jwt\", response.token);\r",
 									"    console.log(\"JWT Token saved to environment.\");\r",
+									"    console.log(token_jwt);\r",
 									"}"
 								],
 								"type": "text/javascript",
@@ -62,7 +63,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"denish@example.com\",\r\n    \"password\": \"password123\"\r\n}"
+							"raw": "{\r\n    \"email\": \"denish@example.com\",\r\n    \"password\": \"password123\",\r\n    \"fcm_token\":\"APA91-rnPfj3WXPOxzv4EXENc5z2Fmks3ErA5-6C-0S6aCDlpAuTsNhJsAH6M9ExHnPemfC37R_X60inODhltrDL23VoUPBUSQRgHQLRPmzKNCFmnbgL0bKFs3WHUrnNaShNCqWWIXUvBI-nZDQtU1mpiIoOIeA8z2nZLmIhnJ9BQfstEOaLbC5\"\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
@@ -238,6 +239,16 @@
 				{
 					"name": "Get Quiz",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -398,6 +409,179 @@
 							"path": [
 								"educations",
 								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Complaint",
+			"item": [
+				{
+					"name": "Create Complaint",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"complaints\": []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/complaints",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"complaints"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Complaints",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/complaints",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"complaints"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Complaint by Id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/complaints/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"complaints",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Drug Schedule",
+			"item": [
+				{
+					"name": "Create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"drug_name\": \"Obat Tes Sore\",\r\n    \"dose\": \"1 tablet\",\r\n    \"schedule_date\": \"2025-10-17\", // Tanggal hari ini\r\n    \"at_06\": false,\r\n    \"at_12\": false,\r\n    \"at_18\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/drug-schedules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"drug-schedules"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Control Schedule",
+			"item": [
+				{
+					"name": "Create Control Schedule",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"control_date\": \"2025-10-18\",\r\n    \"notes\": \"Tes jadwal kontrol untuk besok\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/control-schedules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"control-schedules"
 							]
 						}
 					},
