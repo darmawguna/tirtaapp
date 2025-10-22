@@ -92,6 +92,13 @@ func (s *queueService) Connect() error {
 
 // PublishMessage mengirim pesan langsung ke exchange utama.
 func (s *queueService) PublishMessage(payload ReminderMessage) error {
+	if s.channel == nil || s.conn.IsClosed() {
+		log.Println("RabbitMQ connection is closed. Attempting to reconnect...")
+		if err := s.Connect(); err != nil {
+			return fmt.Errorf("failed to reconnect to RabbitMQ: %w", err)
+		}
+		log.Println("Reconnected to RabbitMQ successfully.")
+	}
 	body, err := json.Marshal(payload)
 	if err != nil { return fmt.Errorf("failed to marshal payload: %w", err) }
 
