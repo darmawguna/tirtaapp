@@ -1,51 +1,81 @@
 services:
   # --- Layanan API Anda ---
   tirtapp-api:
-    image: darmawiguna/tirtapp-api:latest # Nama image API
+    image: darmawiguna/tirtapp-api:latest
     container_name: tirtapp-api-prod
     restart: always
     ports:
-      - "127.0.0.1:8095:8080"
+      - "127.0.0.1:8095:8080" # Hanya expose ke localhost VPS
     env_file:
       - ./.env
     depends_on:
       mysql-db:
-        condition: service_healthy
+        condition: service_healthy # Tunggu DB benar-benar siap
       rabbitmq:
-        condition: service_started # RabbitMQ 3+ starts quickly, 'started' is usually sufficient
+        condition: service_started # Tunggu RabbitMQ mulai
 
-  # --- [BARU] Layanan Worker ---
+  # --- Layanan Worker ---
   tirtapp-worker:
-    image: darmawiguna/tirtapp-worker:latest # Nama image Worker
+    image: darmawiguna/tirtapp-worker:latest
     container_name: tirtapp-worker-prod
     restart: always
     env_file:
       - ./.env
     volumes:
-      # Mount file secret dari host ke dalam container worker
+      # Mount file secret Firebase dari host (VPS) ke dalam container worker
       # Pastikan file ./secrets/firebase-service-account.json ada di VPS
-      - ./secrets/firebase-service-account.json:/app/secrets/firebase-service-account.json:ro
+      - ./secrets/firebase-service-account.json:/app/secrets/firebase-service-account.json:ro # :ro = read-only
     depends_on:
       mysql-db:
-        condition: service_healthy
+        condition: service_healthy # Tunggu DB benar-benar siap
       rabbitmq:
-        condition: service_started
+        condition: service_started # Tunggu RabbitMQ mulai
 
   # --- Layanan Database MySQL ---
   mysql-db:
     image: mysql:8.0
-    # ... (konfigurasi mysql tidak berubah) ...
+    container_name: tirtapp-mysql-db # Nama kontainer yang jelas
+    restart: always
+    environment:
+      # Variabel ini dibaca oleh image MySQL saat startup awal
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD} # Ambil dari file .env
+      MYSQL_DATABASE: ${DB_NAME}               # Ambil dari file .env (database akan dibuat otomatis)
+      MYSQL_USER: ${DB_USER}                   # Ambil dari file .env (user akan dibuat otomatis)
+      MYSQL_PASSWORD: ${DB_PASSWORD}           # Ambil dari file .env
+    ports:
+      # (Opsional) Buka port 3311 di VPS ke port 3306 di kontainer MySQL
+      # Berguna untuk koneksi eksternal (misal: DBeaver)
+      - "3311:3306"
+    healthcheck:
+      # Perintah untuk memeriksa apakah server MySQL siap menerima koneksi
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      interval: 10s # Cek setiap 10 detik
+      timeout: 5s   # Tunggu maksimal 5 detik
+      retries: 5    # Coba 5 kali sebelum menandai 'unhealthy'
+      start_period: 30s # Beri waktu 30 detik untuk MySQL startup sebelum healthcheck pertama
     volumes:
+      # Menyimpan data MySQL secara permanen di volume Docker
       - db-data:/var/lib/mysql
 
   # --- Layanan Message Queue RabbitMQ ---
   rabbitmq:
-    image: rabbitmq:3-management # Gunakan image resmi, pastikan setup DLX di code Go benar
-    container_name: tirtapp-rabbitmq
-    # ... (konfigurasi rabbitmq tidak berubah) ...
+    image: rabbitmq:3-management # Image resmi dengan dashboard web
+    container_name: tirtapp-rabbitmq # Nama kontainer yang jelas
+    restart: always
+    ports:
+      # 5672: Port AMQP untuk komunikasi aplikasi (API/Worker)
+      # 15672: Port untuk dashboard web management
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      # Atur username dan password default (harus sama dengan di .env)
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER} # Ambil dari file .env
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS} # Ambil dari file .env
     volumes:
+      # Menyimpan data RabbitMQ (konfigurasi, pesan persisten) secara permanen
       - rabbitmq-data:/var/lib/rabbitmq/
 
+# --- Volume untuk persistensi data ---
 volumes:
-  db-data:
-  rabbitmq-data:
+  db-data: # Volume untuk data MySQL
+  rabbitmq-data: # Volume untuk data RabbitMQ
