@@ -6,14 +6,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
-	// "time" // Tidak perlu time lagi di sini jika sudah di worker package
+	"time" // <-- Import time
 
 	"github.com/darmawguna/tirtaapp.git/config"   // Adjust path
 	"github.com/darmawguna/tirtaapp.git/services" // Adjust path
 	"github.com/darmawguna/tirtaapp.git/worker"   // <-- Import paket worker
 	"github.com/robfig/cron/v3"
-	// Masih dibutuhkan jika helper dihapus dan dipindah ke sini
+	// "github.com/spf13/viper" // Tidak diperlukan lagi di sini
 )
 
 func main() {
@@ -26,19 +25,35 @@ func main() {
 		log.Fatalf("FATAL: Worker initialization failed: %v", err)
 	}
 
-	// [PERBAIKAN] Gunakan QueueService untuk koneksi DAN setup
-	queueService := services.NewQueueService()
-	if err := queueService.Connect(); err != nil {
-		log.Fatalf("FATAL: Failed to connect and setup RabbitMQ: %v", err)
+	// [PEMBARUAN] Koneksi ke RabbitMQ dengan Retry
+	var queueService services.QueueService
+	var connErr error
+	maxRetries := 10          // Coba maksimal 10 kali
+	retryDelay := 5 * time.Second // Jeda 5 detik antar percobaan
+
+	for i := 0; i < maxRetries; i++ {
+		queueService = services.NewQueueService()
+		connErr = queueService.Connect()
+		if connErr == nil {
+			log.Println("Successfully connected and set up RabbitMQ.")
+			break // Berhasil, keluar dari loop
+		}
+		log.Printf("WARN: Failed to connect to RabbitMQ (attempt %d/%d): %v. Retrying in %v...", i+1, maxRetries, connErr, retryDelay)
+		time.Sleep(retryDelay)
 	}
-	// Defer Close untuk QueueService akan menutup koneksi & channel di akhir
+	// Jika masih error setelah semua retry, baru Fatal
+	if connErr != nil {
+		log.Fatalf("FATAL: Could not connect to RabbitMQ after %d attempts: %v", maxRetries, connErr)
+	}
+	// Pastikan defer Close ada SETELAH loop berhasil
 	defer queueService.Close()
 
-	// [PERBAIKAN] Ambil channel HANYA dari QueueService
+	// Ambil channel dari service yang sudah siap
 	ch := queueService.GetChannel()
 	if ch == nil {
 		log.Fatalf("FATAL: Failed to get RabbitMQ channel from QueueService")
 	}
+
 	// Set QoS menggunakan channel yang didapat dari QueueService
 	if err := ch.Qos(1, 0, false); err != nil {
 		log.Fatalf("FATAL: Failed to set QoS: %v", err)
