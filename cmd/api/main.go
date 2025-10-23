@@ -41,6 +41,8 @@ func main() {
 	// --- Tahap 2: Dependency Injection ---
 	// Inisialisasi semua layer (Repository, Service, Handler)
 	userRepository := repositories.NewUserRepository(db)
+	quizRepository := repositories.NewQuizRepository(db)
+	educationRepository := repositories.NewEducationRepository(db)
 	deviceRepository := repositories.NewDeviceRepository(db)
 	drugScheduleRepository := repositories.NewDrugScheduleRepository(db)
 	controlScheduleRepo := repositories.NewControlScheduleRepository(db)
@@ -50,6 +52,8 @@ func main() {
 	// (Tambahkan repository lain di sini jika ada)
 
 	deviceService := services.NewDeviceService(deviceRepository)
+	quizService := services.NewQuizService(quizRepository)
+	educationService := services.NewEducationService(educationRepository)
 	authService := services.NewAuthService(userRepository, deviceService)
 	drugScheduleService := services.NewDrugScheduleService(drugScheduleRepository, queueService)
 	controlScheduleService := services.NewControlScheduleService(controlScheduleRepo, queueService)
@@ -61,6 +65,8 @@ func main() {
 
 	authHandler := handlers.NewAuthHandler(authService)
 	drugScheduleHandler := handlers.NewDrugScheduleHandler(drugScheduleService)
+	quizHandler := handlers.NewQuizHandler(quizService)
+	educationHandler := handlers.NewEducationHandler(educationService)
 	controlScheduleHandler := handlers.NewControlScheduleHandler(controlScheduleService)
 	hemodialysisScheduleHandler := handlers.NewHemodialysisScheduleHandler(hemodialysisScheduleService)
 	fluidBalanceHandler := handlers.NewFluidBalanceHandler(fluidBalanceService)
@@ -74,6 +80,8 @@ func main() {
 	// Mendaftarkan semua routes
 	routes.SetupAuthRoutes(router, authHandler)
 	routes.SetupDrugScheduleRoutes(router, drugScheduleHandler)
+	routes.SetupQuizRoutes(router,quizHandler)
+	routes.SetupEducationRoutes(router, educationHandler)
 	routes.SetupControlScheduleRoutes(router, controlScheduleHandler)
 	routes.SetupHemodialysisScheduleRoutes(router, hemodialysisScheduleHandler)
 	routes.SetupFluidBalanceRoutes(router, fluidBalanceHandler)
