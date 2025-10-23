@@ -12,7 +12,7 @@ services:
       mysql-db:
         condition: service_healthy # Tunggu DB benar-benar siap
       rabbitmq:
-        condition: service_started # Tunggu RabbitMQ mulai
+        condition: service_healthy # Tunggu RabbitMQ mulai
 
   # --- Layanan Worker ---
   tirtapp-worker:
@@ -29,7 +29,7 @@ services:
       mysql-db:
         condition: service_healthy # Tunggu DB benar-benar siap
       rabbitmq:
-        condition: service_started # Tunggu RabbitMQ mulai
+        condition: service_healthy # Tunggu RabbitMQ mulai
 
   # --- Layanan Database MySQL ---
   mysql-db:
@@ -74,6 +74,12 @@ services:
     volumes:
       # Menyimpan data RabbitMQ (konfigurasi, pesan persisten) secara permanen
       - rabbitmq-data:/var/lib/rabbitmq/
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping || exit 1 # Perintah internal RabbitMQ
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 # --- Volume untuk persistensi data ---
 volumes:
