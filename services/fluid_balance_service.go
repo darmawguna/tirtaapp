@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -13,16 +14,17 @@ import (
 
 // Definisikan batas cairan (bisa diambil dari config nantinya)
 const dailyIntakeLimit = 600
-const warningThreshold = 500 // Batas balance untuk memicu warning
+const warningThreshold = 500
 
 type FluidBalanceService interface {
 	CreateOrUpdateLog(userID uint, input dto.CreateOrUpdateFluidLogDTO) (models.FluidBalanceLog, error)
 	GetUserHistory(userID uint) ([]models.FluidBalanceLog, error)
 }
 
+
 type fluidBalanceService struct {
+	repo     repositories.FluidBalanceRepository
 	userRepo repositories.UserRepository
-	repo repositories.FluidBalanceRepository
 }
 
 func NewFluidBalanceService(repo repositories.FluidBalanceRepository, userRepo repositories.UserRepository) FluidBalanceService {
@@ -31,57 +33,64 @@ func NewFluidBalanceService(repo repositories.FluidBalanceRepository, userRepo r
 
 
 func (s *fluidBalanceService) CreateOrUpdateLog(userID uint, input dto.CreateOrUpdateFluidLogDTO) (models.FluidBalanceLog, error) {
-	// [PEMBARUAN] Ambil data user untuk mendapatkan timezone
-	user, err := s.userRepo.FindByID(userID)
+	nowUTC := time.Now().UTC()
+	todayUTC := time.Date(nowUTC.Year(), nowUTC.Month(), nowUTC.Day(), 0, 0, 0, 0, time.UTC)
+
+	// [LOGIKA BISNIS] Cek apakah log sudah ada untuk hari ini
+	existingLog, err := s.repo.FindByUserAndDate(userID, todayUTC)
+
+	var finalLog models.FluidBalanceLog
+	var repoErr error
+
 	if err != nil {
-		return models.FluidBalanceLog{}, fmt.Errorf("could not find user %d: %w", userID, err)
-	}
+		// Jika error BUKAN karena tidak ditemukan, kembalikan error
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return models.FluidBalanceLog{}, fmt.Errorf("gagal mencari log hari ini: %w", err)
+		}
 
-	// Muat lokasi/zona waktu spesifik milik user
-	location, err := time.LoadLocation(user.Timezone)
-	if err != nil {
-		log.Printf("WARNING: Invalid timezone '%s' for user %d. Falling back to UTC.", user.Timezone, user.ID)
-		location, _ = time.LoadLocation("UTC") // Fallback ke UTC jika timezone tidak valid
-	}
+		// --- Kasus 1: Record belum ada -> Buat Baru ---
+		log.Println("No existing log found for today. Creating new one.")
+		newLog := models.FluidBalanceLog{
+			UserID:   userID,
+			LogDate:  todayUTC,
+			IntakeCC: input.IntakeCC,
+			OutputCC: input.OutputCC,
+		}
+		newLog.BalanceCC = newLog.IntakeCC - newLog.OutputCC
+		// Terapkan warning jika perlu
+		if newLog.BalanceCC >= warningThreshold {
+			newLog.WarningMessage = fmt.Sprintf("Peringatan!...") // Isi pesan warning
+		}
+		// Panggil repo.Create
+		finalLog, repoErr = s.repo.Create(newLog)
 
-	now := time.Now().In(location) // Dapatkan waktu saat ini di zona waktu user
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, location) // Tanggal hari ini di zona waktu user
-
-	// Cek apakah sudah ada log untuk hari ini
-	existingLog, err := s.repo.FindByUserAndDate(userID, today)
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return models.FluidBalanceLog{}, err
-	}
-
-	// Buat atau update log
-	logEntry := existingLog
-	logEntry.UserID = userID
-	logEntry.LogDate = today // Simpan tanggal sesuai zona waktu user
-
-	// Logika Akumulasi (tidak berubah)
-	if logEntry.ID == 0 {
-		logEntry.IntakeCC = input.IntakeCC
-		logEntry.OutputCC = input.OutputCC
 	} else {
-		logEntry.IntakeCC += input.IntakeCC
-		logEntry.OutputCC += input.OutputCC
+		// --- Kasus 2: Record sudah ada -> Update ---
+		log.Println("Existing log found for today (ID:", existingLog.ID, "). Updating.")
+		// Akumulasi nilai
+		existingLog.IntakeCC += input.IntakeCC
+		existingLog.OutputCC += input.OutputCC
+		// Hitung ulang balance & warning
+		existingLog.BalanceCC = existingLog.IntakeCC - existingLog.OutputCC
+		existingLog.WarningMessage = "" // Reset warning
+		if existingLog.BalanceCC >= warningThreshold {
+			existingLog.WarningMessage = fmt.Sprintf("Peringatan!...") // Isi pesan warning
+			log.Printf("Warning triggered...")
+		}
+		// Panggil repo.Update
+		finalLog, repoErr = s.repo.Update(existingLog)
 	}
 
-	// Hitung balance berdasarkan total akumulasi
-	logEntry.BalanceCC = logEntry.IntakeCC - logEntry.OutputCC
-	logEntry.WarningMessage = "" // Reset warning message
-
-	// Terapkan aturan warning
-	if logEntry.BalanceCC >= warningThreshold {
-		logEntry.WarningMessage = fmt.Sprintf("Peringatan!\n\nHalo Bapak/Ibu, total keseimbangan cairan Anda hari ini (%d cc) sudah mendekati batas maksimal harian (%d cc/24 jam). Ingat, kelebihan cairan bisa menimbulkan sesak napas dan bengkak. Mari jaga kesehatan dengan mematuhi batas cairan harian Anda. Informasi lengkap tentang pengelolaan cairan dapat dilihat di menu Edukasi.", logEntry.BalanceCC, dailyIntakeLimit)
-		log.Printf("Warning triggered for user %d, accumulated balance: %d", userID, logEntry.BalanceCC)
+	// Tangani error dari operasi Create atau Update
+	if repoErr != nil {
+		return models.FluidBalanceLog{}, fmt.Errorf("gagal menyimpan log cairan: %w", repoErr)
 	}
 
-	// Simpan ke database (Upsert)
-	return s.repo.Upsert(logEntry)
+	return finalLog, nil
 }
 
 func (s *fluidBalanceService) GetUserHistory(userID uint) ([]models.FluidBalanceLog, error) {
-	// Ambil riwayat, misalnya 7 hari terakhir
-	return s.repo.FindHistoryByUserID(userID, 7)
+	logs, err := s.repo.FindHistoryByUserID(userID, 7)
+	if err != nil { return nil, fmt.Errorf("gagal mengambil riwayat cairan: %w", err) }
+	return logs, nil
 }

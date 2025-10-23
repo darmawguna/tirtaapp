@@ -1,18 +1,20 @@
 package repositories
 
 import (
+	// "errors" // Tidak perlu lagi di sini
+	// "fmt" // Tidak perlu lagi di sini
 	"time"
 
-	models "github.com/darmawguna/tirtaapp.git/model" // Sesuaikan path
+	models "github.com/darmawguna/tirtaapp.git/model"
 	"gorm.io/gorm"
 )
 
 type FluidBalanceRepository interface {
-	// Mencari log berdasarkan userID dan tanggal.
 	FindByUserAndDate(userID uint, date time.Time) (models.FluidBalanceLog, error)
-	// Membuat atau memperbarui log (jika sudah ada untuk tanggal tersebut).
-	Upsert(log models.FluidBalanceLog) (models.FluidBalanceLog, error)
-	// Mengambil riwayat log untuk user.
+	// Hapus Upsert
+	// Upsert(log models.FluidBalanceLog) (models.FluidBalanceLog, error)
+	Create(log models.FluidBalanceLog) (models.FluidBalanceLog, error) // <-- Tambah Create
+	Update(log models.FluidBalanceLog) (models.FluidBalanceLog, error) // <-- Tambah Update
 	FindHistoryByUserID(userID uint, limit int) ([]models.FluidBalanceLog, error)
 }
 
@@ -24,19 +26,26 @@ func NewFluidBalanceRepository(db *gorm.DB) FluidBalanceRepository {
 	return &fluidBalanceRepository{db: db}
 }
 
+// FindByUserAndDate: Tetap sama, gunakan DATE() SQL
 func (r *fluidBalanceRepository) FindByUserAndDate(userID uint, date time.Time) (models.FluidBalanceLog, error) {
 	var log models.FluidBalanceLog
-	// Hanya ambil tanggalnya saja
-	dateOnly := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-	err := r.db.Where("user_id = ? AND log_date = ?", userID, dateOnly).First(&log).Error
+	err := r.db.Where("user_id = ? AND DATE(log_date) = DATE(?)", userID, date.UTC()).First(&log).Error
 	return log, err
 }
 
-func (r *fluidBalanceRepository) Upsert(log models.FluidBalanceLog) (models.FluidBalanceLog, error) {
-	// GORM's Save akan INSERT jika ID 0, atau UPDATE jika ID sudah ada.
+// [BARU] Create: Fungsi sederhana untuk INSERT
+func (r *fluidBalanceRepository) Create(log models.FluidBalanceLog) (models.FluidBalanceLog, error) {
+	err := r.db.Create(&log).Error
+	return log, err
+}
+
+// [BARU] Update: Fungsi sederhana untuk UPDATE
+func (r *fluidBalanceRepository) Update(log models.FluidBalanceLog) (models.FluidBalanceLog, error) {
+	// Gunakan Save karena log sudah memiliki ID yang valid
 	err := r.db.Save(&log).Error
 	return log, err
 }
+
 
 func (r *fluidBalanceRepository) FindHistoryByUserID(userID uint, limit int) ([]models.FluidBalanceLog, error) {
 	var logs []models.FluidBalanceLog

@@ -2,12 +2,15 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/darmawguna/tirtaapp.git/utils"
 
 	"github.com/darmawguna/tirtaapp.git/config"
 	"github.com/darmawguna/tirtaapp.git/handlers"
@@ -24,6 +27,8 @@ var db *gorm.DB
 
 func main() {
 	// --- Tahap 1: Inisialisasi Konfigurasi & Koneksi ---
+	clearDB := flag.Bool("clear-db", false, "Set this flag to delete all data from the database before starting")
+	flag.Parse()
 	config.LoadConfig()
 	db = config.ConnectDB()
 	config.RunMigration(db,
@@ -36,6 +41,14 @@ func main() {
 	queueService := services.NewQueueService()
 	if err := queueService.Connect(); err != nil {
 		log.Fatalf("Could not connect to RabbitMQ: %s", err)
+	}
+	if *clearDB {
+		err := utils.ClearAllData(db) // Call the clear function
+		if err != nil {
+			log.Fatalf("FATAL: Could not clear database: %v", err)
+		}
+		log.Println("Database cleared successfully via flag.")
+		// Optional: os.Exit(0) if you only want to clear and not start the server
 	}
 
 	// --- Tahap 2: Dependency Injection ---
