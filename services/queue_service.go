@@ -30,6 +30,7 @@ type QueueService interface {
 	Connect() error
 	PublishMessage(payload ReminderMessage) error
 	Close()
+	GetChannel() *amqp091.Channel
 }
 
 type queueService struct {
@@ -125,4 +126,8 @@ func (s *queueService) PublishMessage(payload ReminderMessage) error {
 func (s *queueService) Close() {
 	if s.channel != nil { s.channel.Close() }
 	if s.conn != nil { s.conn.Close() }
+}
+
+func (s *queueService) GetChannel() *amqp091.Channel {
+	return s.channel
 }
