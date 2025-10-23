@@ -21,7 +21,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 FROM debian:bookworm-slim AS final
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends wkhtmltopdf ca-certificates && \
+    apt-get install -y --no-install-recommends ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --system nonroot && \

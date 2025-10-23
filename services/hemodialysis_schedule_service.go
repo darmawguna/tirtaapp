@@ -36,7 +36,6 @@ func (s *hemodialysisScheduleService) Create(userID uint, input dto.CreateHemodi
 	schedule := models.HemodialysisSchedule{
 		UserID:       userID,
 		ScheduleDate: scheduleDate,
-		Notes:        input.Notes,
 	}
 
 	createdSchedule, err := s.repo.Create(schedule)
@@ -80,7 +79,6 @@ func (s *hemodialysisScheduleService) Update(id uint, userID uint, input dto.Upd
 	}
 
 	schedule.ScheduleDate = scheduleDate
-	schedule.Notes = input.Notes
 	schedule.IsActive = *input.IsActive
 
 	return s.repo.Update(schedule)

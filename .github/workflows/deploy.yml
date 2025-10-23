@@ -32,6 +32,13 @@ jobs:
           context: .
           push: true
           tags: darmawiguna/tirtapp-api:latest
+      - name: Build and push Worker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          dockerfile: Dockerfile.worker # File Dockerfile untuk Worker
+          push: true
+          tags: darmawiguna/tirtapp-worker:latest
   # Job 2: Mendeploy ke VPS.
   deploy:
     name: Deploy to VPS
