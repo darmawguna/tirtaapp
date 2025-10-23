@@ -1,0 +1,45 @@
+# syntax=docker/dockerfile:1.7
+
+# --- Stage 1: Builder ---
+# Build environment, same as before
+FROM golang:1.24-bookworm AS builder
+WORKDIR /src
+COPY go.mod go.sum ./
+# [OPSIONAL, TAPI DIREKOMENDASIKAN] Gunakan cache mount untuk download dependensi
+RUN --mount=type=cache,target=/go/pkg/mod go mod download
+COPY . .
+# Build worker executable
+# [OPSIONAL, TAPI DIREKOMENDASIKAN] Gunakan cache mount dan flag optimasi
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 go build -trimpath -buildvcs=false -ldflags="-s -w" -o /out/tirtapp-worker ./cmd/worker/main.go
+
+# --- Stage 2: Final (Worker Runtime) ---
+FROM debian:bookworm-slim AS final
+
+# [BARU] Tambahkan instalasi ca-certificates untuk koneksi HTTPS (Firebase, dll)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# [BARU] Buat user dan grup non-root
+RUN groupadd --system nonroot && \
+    useradd --system --gid nonroot nonroot
+
+WORKDIR /app
+
+# Salin hanya binary worker dari stage builder
+COPY --from=builder /out/tirtapp-worker .
+
+# [PENTING] Kita TIDAK menyalin file secret di sini.
+# File secret akan di-mount menggunakan volume di docker-compose.yml.
+# Kita hanya perlu memastikan direktori tujuan mount ada dan memiliki izin yang benar.
+RUN mkdir /app/secrets && chown nonroot:nonroot /app/secrets
+
+# Atur kepemilikan binary worker ke user nonroot
+RUN chown nonroot:nonroot ./tirtapp-worker
+
+# [BARU] Pindah ke user nonroot
+USER nonroot:nonroot
+
+# Perintah untuk menjalankan worker
+CMD ["./tirtapp-worker"]
