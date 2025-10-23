@@ -7,6 +7,7 @@ import (
 )
 
 func SetupFluidBalanceRoutes(router *gin.Engine, handler *handlers.FluidBalanceHandler) {
+	// Testing
 	routes := router.Group("/api/v1/fluids")
 	routes.Use(middlewares.AuthMiddleware())
 	{
