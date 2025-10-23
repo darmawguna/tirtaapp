@@ -25,7 +25,6 @@ func toHemodialysisScheduleResponse(schedule models.HemodialysisSchedule) dto.He
 		ID:           schedule.ID,
 		UserID:       schedule.UserID,
 		ScheduleDate: schedule.ScheduleDate.Format("2006-01-02"),
-		Notes:        schedule.Notes,
 		IsActive:     schedule.IsActive,
 	}
 }

@@ -1,58 +1,51 @@
 services:
   # --- Layanan API Anda ---
   tirtapp-api:
-    image: darmawiguna/tirtapp-api:latest
+    image: darmawiguna/tirtapp-api:latest # Nama image API
     container_name: tirtapp-api-prod
     restart: always
     ports:
       - "127.0.0.1:8095:8080"
     env_file:
       - ./.env
-    # [TAMBAHAN] Memberitahu service ini untuk menunggu database siap terlebih dahulu
     depends_on:
       mysql-db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started # RabbitMQ 3+ starts quickly, 'started' is usually sufficient
+
+  # --- [BARU] Layanan Worker ---
+  tirtapp-worker:
+    image: darmawiguna/tirtapp-worker:latest # Nama image Worker
+    container_name: tirtapp-worker-prod
+    restart: always
+    env_file:
+      - ./.env
+    volumes:
+      # Mount file secret dari host ke dalam container worker
+      # Pastikan file ./secrets/firebase-service-account.json ada di VPS
+      - ./secrets/firebase-service-account.json:/app/secrets/firebase-service-account.json:ro
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
 
   # --- Layanan Database MySQL ---
   mysql-db:
     image: mysql:8.0
-    container_name: tirtapp-mysql-db
-    restart: always
-    environment:
-      # Variabel ini akan digunakan oleh image MySQL untuk setup awal
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD} # Ambil dari file .env
-      MYSQL_DATABASE: ${DB_NAME} # Ambil dari file .env
-      MYSQL_USER: ${DB_USER} # Ambil dari file .env
-      MYSQL_PASSWORD: ${DB_PASSWORD} # Ambil dari file .env
-    ports:
-      # (Opsional) Membuka port database ke VPS untuk diakses dari luar kontainer (misal: via DBeaver)
-      - "3311:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
-      timeout: 20s
-      retries: 10
+    # ... (konfigurasi mysql tidak berubah) ...
     volumes:
-      # Menyimpan data MySQL secara permanen di volume Docker
       - db-data:/var/lib/mysql
 
+  # --- Layanan Message Queue RabbitMQ ---
   rabbitmq:
-    image: rabbitmq:3.13-management-alpine
+    image: rabbitmq:3-management # Gunakan image resmi, pastikan setup DLX di code Go benar
     container_name: tirtapp-rabbitmq
-    ports:
-    # Port 5672 untuk komunikasi API/Worker
-    # Port 15672 untuk dashboard web (opsional, tapi sangat berguna)
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-    # Atur username dan password default untuk RabbitMQ
-    RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
-    RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
-  volumes:
-    # Menyimpan data RabbitMQ agar tidak hilang saat restart
-    - rabbitmq-data:/var/lib/rabbitmq/
+    # ... (konfigurasi rabbitmq tidak berubah) ...
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq/
 
-# --- Volume untuk persistensi data ---
-# Mendefinisikan volume yang akan digunakan oleh layanan di atas
 volumes:
   db-data:
   rabbitmq-data:

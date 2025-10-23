@@ -36,7 +36,6 @@ func (s *controlScheduleService) Create(userID uint, input dto.CreateControlSche
 	schedule := models.ControlSchedule{
 		UserID:      userID,
 		ControlDate: controlDate,
-		Notes:       input.Notes,
 	}
 
 	createdSchedule, err := s.repo.Create(schedule)
@@ -81,7 +80,6 @@ func (s *controlScheduleService) Update(id uint, userID uint, input dto.UpdateCo
 	}
 
 	schedule.ControlDate = controlDate
-	schedule.Notes = input.Notes
 	schedule.IsActive = *input.IsActive
 
 	return s.repo.Update(schedule)

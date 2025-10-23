@@ -25,7 +25,6 @@ func toControlScheduleResponse(schedule models.ControlSchedule) dto.ControlSched
 		ID:          schedule.ID,
 		UserID:      schedule.UserID,
 		ControlDate: schedule.ControlDate.Format("2006-01-02"),
-		Notes:       schedule.Notes,
 		IsActive:    schedule.IsActive,
 	}
 }

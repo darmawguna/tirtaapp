@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"time"
+
 	models "github.com/darmawguna/tirtaapp.git/model"
 	"gorm.io/gorm"
 )
@@ -10,6 +12,7 @@ type HemodialysisScheduleRepository interface {
 	FindAllByUserID(userID uint) ([]models.HemodialysisSchedule, error)
 	FindByID(id uint) (models.HemodialysisSchedule, error)
 	Update(schedule models.HemodialysisSchedule) (models.HemodialysisSchedule, error)
+	FindSchedulesForDateAndNotNotified(date time.Time) ([]models.HemodialysisSchedule, error)
 	Delete(id uint) error
 }
 
@@ -36,6 +39,12 @@ func (r *hemodialysisScheduleRepository) FindByID(id uint) (models.HemodialysisS
 	var schedule models.HemodialysisSchedule
 	err := r.db.First(&schedule, id).Error
 	return schedule, err
+}
+
+func (r *hemodialysisScheduleRepository) FindSchedulesForDateAndNotNotified(date time.Time) ([]models.HemodialysisSchedule, error) {
+	var schedules []models.HemodialysisSchedule
+	err := r.db.Where("schedule_date = ? AND is_active = ? AND monitoring_notification_sent = ?", date, true, false).Find(&schedules).Error
+	return schedules, err
 }
 
 func (r *hemodialysisScheduleRepository) Update(schedule models.HemodialysisSchedule) (models.HemodialysisSchedule, error) {
