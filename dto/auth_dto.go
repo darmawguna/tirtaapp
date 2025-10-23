@@ -14,3 +14,8 @@ type LoginDTO struct {
 	Password string `json:"password" binding:"required"`
 	FCMToken string `json:"fcm_token" binding:"required"`
 }
+
+type UpdateProfileDTO struct {
+	Name     *string `json:"name" binding:"omitempty"` // Hanya validasi jika dikirim
+	Password *string `json:"password" binding:"omitempty,min=6"` // Validasi min 6 jika dikirim
+}

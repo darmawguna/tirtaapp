@@ -10,6 +10,8 @@ type UserRepository interface {
 	CreateUser(user models.User) (models.User, error)
 	FindByEmail(email string) (models.User, error) 
 	FindByID(id uint) (models.User, error) 
+	 // <-- Tambahkan/Pastikan ada
+	Update(user models.User) (models.User, error)
 }
 
 type userRepository struct {
@@ -46,4 +48,10 @@ func (r *userRepository) FindByID(id uint) (models.User, error) {
 		return models.User{}, err // GORM akan return ErrRecordNotFound jika tidak ada
 	}
 	return user, nil
+}
+
+func (r *userRepository) Update(user models.User) (models.User, error) {
+	// GORM Save akan memperbarui semua field record 'user' berdasarkan Primary Key nya.
+	err := r.db.Save(&user).Error
+	return user, err
 }
