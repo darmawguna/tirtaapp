@@ -18,7 +18,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Denish User\",\r\n    \"email\": \"denis@example.com\",\r\n    \"password\": \"password123\",\r\n    \"timezone\": \"Asia/Makassar\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Desri\",\r\n    \"email\": \"desri@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"timezone\": \"Asia/Makassar\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -63,7 +63,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"denis@example.com\",\r\n    \"password\": \"password123\",\r\n    \"fcm_token\":\"APA91-rnPfj3WXPOxzv4EXENc5z2Fmks3ErA5-6C-0S6aCDlpAuTsNhJsAH6M9ExHnPemfC37R_X60inODhltrDL23VoUPBUSQRgHQLRPmzKNCFmnbgL0bKFs3WHUrnNaShNCqWWIXUvBI-nZDQtU1mpiIoOIeA8z2nZLmIhnJ9BQfstEOaLbC5\"\r\n}"
+							"raw": "{\r\n    \"email\": \"dhanan@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"fcm_token\":\"3NltsH8xnw:APA91bGLR9o0Q8qlarzz16Lwgt2nUzfWlMEfNkwSR2yCmpfhVgiIOYn9U1SeVq7-ciQm9tbx-uytDGg8w-PekoKeoFjJGtIo0pSHnu94ixaiinbOYC-_FE8\"\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
@@ -330,7 +330,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{admin_token}}",
+									"value": "{{user_token}}",
 									"type": "string"
 								}
 							]
@@ -532,7 +532,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"drug_name\": \"Obat Tes Sore\",\r\n    \"dose\": \"1 tablet\",\r\n    \"schedule_date\": \"2025-10-17\", // Tanggal hari ini\r\n    \"at_06\": false,\r\n    \"at_12\": false,\r\n    \"at_18\": true\r\n}",
+							"raw": "{\r\n    \"drug_name\": \"Obat Tes Sore Revisi\", \"dose\": \"1\",\r\n    \"schedule_date\": \"2025-10-23\", \"at_18\": true\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -564,7 +564,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{token_jwt}}",
+									"value": "{{user_token}}",
 									"type": "string"
 								}
 							]
@@ -573,7 +573,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"control_date\": \"2025-10-18\",\r\n    \"notes\": \"Tes jadwal kontrol untuk besok\"\r\n}"
+							"raw": "{ \"control_date\": \"2025-10-24\" }"
 						},
 						"url": {
 							"raw": "{{base_url}}/control-schedules",
@@ -658,139 +658,95 @@
 			]
 		},
 		{
-			"name": "Post data",
-			"event": [
+			"name": "Jadwal Hemodialisa",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Successful POST request\", function () {",
-							"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-							"});",
-							""
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"name\": \"Add your name in the body\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "Create Schedule Hemodialisa",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"schedule_date\": \"2025-10-23\" }"
+						},
+						"url": {
+							"raw": "{{base_url}}/hemodialysis-schedules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hemodialysis-schedules"
+							]
 						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/info",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"info"
-					]
-				},
-				"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
-			},
-			"response": []
+					},
+					"response": []
+				}
+			]
 		},
 		{
-			"name": "Update data",
-			"event": [
+			"name": "Hemodialisis Monitoring",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Successful PUT request\", function () {",
-							"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
-							"});",
-							""
-						]
-					}
-				}
-			],
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"name\": \"Add your name in the body\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "Create monitoring",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"bp_before\": \"140/90\",\r\n    \"bp_after\": \"130/85\",\r\n    \"weight_before\": 68.5,\r\n    \"weight_after\": 66.0\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/hemodialysis-monitoring/{{hd_schedule_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hemodialysis-monitoring",
+								"{{hd_schedule_id}}"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{base_url}}/info?id=1",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"info"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "1"
-						}
-					]
-				},
-				"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
-			},
-			"response": []
-		},
-		{
-			"name": "Delete data",
-			"event": [
 				{
-					"listen": "test",
-					"script": {
-						"type": "text/javascript",
-						"exec": [
-							"pm.test(\"Successful DELETE request\", function () {",
-							"    pm.expect(pm.response.code).to.be.oneOf([200, 202, 204]);",
-							"});",
-							""
-						]
-					}
+					"name": "Get History",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/hemodialysis-monitoring/history",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hemodialysis-monitoring",
+								"history"
+							]
+						}
+					},
+					"response": []
 				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/info?id=1",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"info"
-					],
-					"query": [
-						{
-							"key": "id",
-							"value": "1"
-						}
-					]
-				},
-				"description": "This is a DELETE request, and it is used to delete data that was previously created via a POST request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful DELETE request typically returns a `200 OK`, `202 Accepted`, or `204 No Content` response code."
-			},
-			"response": []
+			]
 		}
 	],
 	"event": [
@@ -842,6 +798,11 @@
 		},
 		{
 			"key": "education_id",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "hd_schedule_id",
 			"value": "",
 			"type": "default"
 		}
