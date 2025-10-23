@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-
+# Test
 # --- Stage 1: Builder ---
 # Build environment, same as before
 FROM golang:1.24-bookworm AS builder
