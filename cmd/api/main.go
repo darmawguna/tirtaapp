@@ -49,6 +49,7 @@ func main() {
 	hemodialysisScheduleRepo := repositories.NewHemodialysisScheduleRepository(db)
 	fluidBalanceRepo := repositories.NewFluidBalanceRepository(db)
 	hemodialysisMonitoringRepo := repositories.NewHemodialysisMonitoringRepository(db)
+	complaintRepository := repositories.NewComplaintRepository(db)
 	// (Tambahkan repository lain di sini jika ada)
 
 	deviceService := services.NewDeviceService(deviceRepository)
@@ -61,6 +62,7 @@ func main() {
 	fluidBalanceService := services.NewFluidBalanceService(fluidBalanceRepo, userRepository)
 	hemodialysisMonitoringService := services.NewHemodialysisMonitoringService(hemodialysisMonitoringRepo, hemodialysisScheduleRepo)
 	profileService := services.NewProfileService(userRepository)
+	complaintService := services.NewComplaintService(complaintRepository)
 	// (Tambahkan service lain di sini jika ada)
 
 	authHandler := handlers.NewAuthHandler(authService)
@@ -72,6 +74,7 @@ func main() {
 	fluidBalanceHandler := handlers.NewFluidBalanceHandler(fluidBalanceService)
 	hemodialysisMonitoringHandler := handlers.NewHemodialysisMonitoringHandler(hemodialysisMonitoringService)
 	profileHandler := handlers.NewProfileHandler(profileService)
+	complaintHandler := handlers.NewComplaintHandler(complaintService)
 	// (Tambahkan handler lain di sini jika ada)
 
 	// --- Tahap 3: Setup Router dan Server ---
@@ -87,6 +90,8 @@ func main() {
 	routes.SetupFluidBalanceRoutes(router, fluidBalanceHandler)
 	routes.SetupHemodialysisMonitoringRoutes(router,hemodialysisMonitoringHandler)
 	routes.SetupProfileRoutes(router, profileHandler)
+	routes.SetupComplaintRoutes(router, complaintHandler)
+
 	// (Tambahkan pendaftaran route lain di sini)
 
 	// Endpoint health check
