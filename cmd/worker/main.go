@@ -2,18 +2,18 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
+	// "time" // Tidak perlu time lagi di sini jika sudah di worker package
+
 	"github.com/darmawguna/tirtaapp.git/config"   // Adjust path
 	"github.com/darmawguna/tirtaapp.git/services" // Adjust path
-	"github.com/darmawguna/tirtaapp.git/worker"   // <-- Import paket worker baru
-	"github.com/rabbitmq/amqp091-go"
+	"github.com/darmawguna/tirtaapp.git/worker"   // <-- Import paket worker
 	"github.com/robfig/cron/v3"
-	"github.com/spf13/viper"
+	// Masih dibutuhkan jika helper dihapus dan dipindah ke sini
 )
 
 func main() {
@@ -26,26 +26,34 @@ func main() {
 		log.Fatalf("FATAL: Worker initialization failed: %v", err)
 	}
 
-	// Koneksi RabbitMQ (tetap di main untuk lifecycle management)
-	conn, ch, err := connectRabbitMQ() // Gunakan helper connectRabbitMQ
-	if err != nil {
-		log.Fatalf("FATAL: Failed to connect to RabbitMQ: %v", err)
+	// [PERBAIKAN] Gunakan QueueService untuk koneksi DAN setup
+	queueService := services.NewQueueService()
+	if err := queueService.Connect(); err != nil {
+		log.Fatalf("FATAL: Failed to connect and setup RabbitMQ: %v", err)
 	}
-	defer conn.Close()
-	defer ch.Close()
-	ch.Qos(1, 0, false)
+	// Defer Close untuk QueueService akan menutup koneksi & channel di akhir
+	defer queueService.Close()
+
+	// [PERBAIKAN] Ambil channel HANYA dari QueueService
+	ch := queueService.GetChannel()
+	if ch == nil {
+		log.Fatalf("FATAL: Failed to get RabbitMQ channel from QueueService")
+	}
+	// Set QoS menggunakan channel yang didapat dari QueueService
+	if err := ch.Qos(1, 0, false); err != nil {
+		log.Fatalf("FATAL: Failed to set QoS: %v", err)
+	}
 
 	// Setup Cron Job
 	cr := cron.New()
-	// _, err = cr.AddFunc("* * * * *", workerInstance.SendDailyMonitoringReminders) // Panggil method worker
-	_, err = cr.AddFunc("0 6 * * *", workerInstance.SendDailyMonitoringReminders) // Panggil method worker
+	_, err = cr.AddFunc("0 6 * * *", workerInstance.SendDailyMonitoringReminders)
 	if err != nil {
 		log.Fatalf("FATAL: Could not add cron job: %v", err)
 	}
 	cr.Start()
 	log.Println("Cron job scheduled.")
 
-	// Mulai Consumer RabbitMQ
+	// Mulai Consumer RabbitMQ menggunakan channel yang didapat dari QueueService
 	msgs, err := ch.Consume(services.MainQueue, "", false, false, false, false, nil)
 	if err != nil {
 		log.Fatalf("FATAL: Failed to register a consumer: %v", err)
@@ -60,10 +68,8 @@ func main() {
 	go func() {
 		for d := range msgs {
 			log.Printf("-> Received RabbitMQ message: %s", d.Body)
-			// Panggil MessageHandler dari instance worker
 			err := workerInstance.MessageHandler(d.Body)
 			if err != nil {
-				// Gunakan ErrRequeueMessage dari paket worker
 				if errors.Is(err, worker.ErrRequeueMessage) {
 					log.Println("<- Message not yet due. Re-queuing via DLX.")
 					d.Nack(false, false)
@@ -83,20 +89,6 @@ func main() {
 	ctx := cr.Stop()
 	<-ctx.Done()
 	log.Println("Cron jobs stopped.")
-	// Koneksi RabbitMQ akan ditutup oleh defer
+	// Koneksi RabbitMQ akan ditutup oleh defer queueService.Close()
 	log.Println("Worker exiting.")
-}
-
-// Helper connectRabbitMQ tetap di sini atau bisa dipindah ke package config/utils
-func connectRabbitMQ() (*amqp091.Connection, *amqp091.Channel, error) {
-	user := viper.GetString("RABBITMQ_USER")
-	pass := viper.GetString("RABBITMQ_PASS")
-	host := viper.GetString("RABBITMQ_HOST")
-	port := viper.GetString("RABBITMQ_PORT")
-	connStr := fmt.Sprintf("amqp://%s:%s@%s:%s/", user, pass, host, port)
-	conn, err := amqp091.Dial(connStr)
-	if err != nil { return nil, nil, fmt.Errorf("failed to dial RabbitMQ: %w", err) }
-	ch, err := conn.Channel()
-	if err != nil { conn.Close(); return nil, nil, fmt.Errorf("failed to open channel: %w", err) }
-	return conn, ch, nil
 }
