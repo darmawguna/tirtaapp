@@ -59,7 +59,8 @@ func (s *fluidBalanceService) CreateOrUpdateLog(userID uint, input dto.CreateOrU
 		newLog.BalanceCC = newLog.IntakeCC - newLog.OutputCC
 		// Terapkan warning jika perlu
 		if newLog.BalanceCC >= warningThreshold {
-			newLog.WarningMessage = fmt.Sprintf("Peringatan!...") // Isi pesan warning
+			newLog.WarningMessage = fmt.Sprintf("Peringatan!\n\nHalo Bapak/Ibu, total keseimbangan cairan Anda hari ini (%d cc) sudah mendekati batas maksimal harian (%d cc/24 jam). Ingat, kelebihan cairan bisa menimbulkan sesak napas dan bengkak. Mari jaga kesehatan dengan mematuhi batas cairan harian Anda. Informasi lengkap tentang pengelolaan cairan dapat dilihat di menu Edukasi.", newLog.BalanceCC, dailyIntakeLimit)
+		log.Printf("Warning triggered for user %d, accumulated balance: %d", userID, newLog.BalanceCC)
 		}
 		// Panggil repo.Create
 		finalLog, repoErr = s.repo.Create(newLog)
