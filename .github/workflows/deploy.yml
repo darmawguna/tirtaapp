@@ -39,6 +39,7 @@ jobs:
           dockerfile: dockerfile.worker # File Dockerfile untuk Worker
           push: true
           tags: darmawiguna/tirtapp-worker:latest
+          no-cache: true
   # Job 2: Mendeploy ke VPS.
   deploy:
     name: Deploy to VPS
