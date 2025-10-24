@@ -10,8 +10,8 @@ type UserRepository interface {
 	CreateUser(user models.User) (models.User, error)
 	FindByEmail(email string) (models.User, error) 
 	FindByID(id uint) (models.User, error) 
-	 // <-- Tambahkan/Pastikan ada
 	Update(user models.User) (models.User, error)
+	UpdateTimeZone (user models.User) (models.User, error)
 }
 
 type userRepository struct {
@@ -54,4 +54,23 @@ func (r *userRepository) Update(user models.User) (models.User, error) {
 	// GORM Save akan memperbarui semua field record 'user' berdasarkan Primary Key nya.
 	err := r.db.Save(&user).Error
 	return user, err
+}
+
+func (r *userRepository) UpdateTimeZone(user models.User) (models.User, error) {
+	result := r.db.Model(&models.User{}).Where("id = ?", user.ID).Update("timezone", user.Timezone)
+
+	if result.Error != nil {
+		// Tangani error jika update gagal
+		return models.User{}, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		// Opsional: Tangani kasus jika user ID tidak ditemukan
+		// (meskipun Model().Where().Update() biasanya tidak error jika record tidak ada)
+		return models.User{}, gorm.ErrRecordNotFound // Atau error custom
+	}
+
+	// Kembalikan objek user (meskipun tidak diperbarui oleh GORM Update,
+	// kita kembalikan inputnya karena sudah berisi timezone baru)
+	return user, nil
 }

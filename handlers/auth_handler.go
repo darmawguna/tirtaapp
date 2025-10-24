@@ -36,14 +36,12 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
-
-	// Kirim response sukses
-	// Kita tidak mengirim password kembali dalam response
 	userResponse := dto.UserResponseDTO{
 		ID:    user.ID,
 		Name:  user.Name,
 		Email: user.Email,
 		Role:  user.Role,
+		PhoneNumber: user.PhoneNumber,
 	}
 	response := utils.SuccessResponse("User registered successfully", userResponse)
 	c.JSON(http.StatusCreated, response)
