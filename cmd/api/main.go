@@ -92,7 +92,8 @@ func main() {
 
 	// --- Tahap 3: Setup Router dan Server ---
 	router := gin.Default()
-	router.Static("/static", "./uploads")
+	router.Static("/static/profiles", "./uploads/profiles")
+	router.Static("/static/educations", "./uploads/educations")
 
 	// Mendaftarkan semua routes
 	routes.SetupAuthRoutes(router, authHandler)
