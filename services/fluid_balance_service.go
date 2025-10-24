@@ -21,7 +21,6 @@ type FluidBalanceService interface {
 	GetUserHistory(userID uint) ([]models.FluidBalanceLog, error)
 }
 
-
 type fluidBalanceService struct {
 	repo     repositories.FluidBalanceRepository
 	userRepo repositories.UserRepository
@@ -30,7 +29,6 @@ type fluidBalanceService struct {
 func NewFluidBalanceService(repo repositories.FluidBalanceRepository, userRepo repositories.UserRepository) FluidBalanceService {
 	return &fluidBalanceService{repo: repo, userRepo: userRepo}
 }
-
 
 func (s *fluidBalanceService) CreateOrUpdateLog(userID uint, input dto.CreateOrUpdateFluidLogDTO) (models.FluidBalanceLog, error) {
 	nowUTC := time.Now().UTC()
@@ -60,7 +58,7 @@ func (s *fluidBalanceService) CreateOrUpdateLog(userID uint, input dto.CreateOrU
 		// Terapkan warning jika perlu
 		if newLog.BalanceCC >= warningThreshold {
 			newLog.WarningMessage = fmt.Sprintf("Peringatan!\n\nHalo Bapak/Ibu, total keseimbangan cairan Anda hari ini (%d cc) sudah mendekati batas maksimal harian (%d cc/24 jam). Ingat, kelebihan cairan bisa menimbulkan sesak napas dan bengkak. Mari jaga kesehatan dengan mematuhi batas cairan harian Anda. Informasi lengkap tentang pengelolaan cairan dapat dilihat di menu Edukasi.", newLog.BalanceCC, dailyIntakeLimit)
-		log.Printf("Warning triggered for user %d, accumulated balance: %d", userID, newLog.BalanceCC)
+			log.Printf("Warning triggered for user %d, accumulated balance: %d", userID, newLog.BalanceCC)
 		}
 		// Panggil repo.Create
 		finalLog, repoErr = s.repo.Create(newLog)
@@ -75,7 +73,7 @@ func (s *fluidBalanceService) CreateOrUpdateLog(userID uint, input dto.CreateOrU
 		existingLog.BalanceCC = existingLog.IntakeCC - existingLog.OutputCC
 		existingLog.WarningMessage = "" // Reset warning
 		if existingLog.BalanceCC >= warningThreshold {
-			existingLog.WarningMessage = fmt.Sprintf("Peringatan!...") // Isi pesan warning
+			existingLog.WarningMessage = fmt.Sprintf("Peringatan!\n\nHalo Bapak/Ibu, total keseimbangan cairan Anda hari ini (%d cc) sudah mendekati batas maksimal harian (%d cc/24 jam). Ingat, kelebihan cairan bisa menimbulkan sesak napas dan bengkak. Mari jaga kesehatan dengan mematuhi batas cairan harian Anda. Informasi lengkap tentang pengelolaan cairan dapat dilihat di menu Edukasi.", existingLog.BalanceCC, dailyIntakeLimit)
 			log.Printf("Warning triggered...")
 		}
 		// Panggil repo.Update
@@ -92,6 +90,8 @@ func (s *fluidBalanceService) CreateOrUpdateLog(userID uint, input dto.CreateOrU
 
 func (s *fluidBalanceService) GetUserHistory(userID uint) ([]models.FluidBalanceLog, error) {
 	logs, err := s.repo.FindHistoryByUserID(userID, 7)
-	if err != nil { return nil, fmt.Errorf("gagal mengambil riwayat cairan: %w", err) }
+	if err != nil {
+		return nil, fmt.Errorf("gagal mengambil riwayat cairan: %w", err)
+	}
 	return logs, nil
 }
