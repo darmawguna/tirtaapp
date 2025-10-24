@@ -18,7 +18,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Desri\",\r\n    \"email\": \"desri@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"timezone\": \"Asia/Makassar\"\r\n}",
+							"raw": "{\r\n    \"name\": \"yudha\",\r\n    \"email\": \"yudha@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"timezone\": \"Asia/Makassar\"\r\n    // \"role\" : \"admin\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -63,7 +63,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"dhanan@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"fcm_token\":\"3NltsH8xnw:APA91bGLR9o0Q8qlarzz16Lwgt2nUzfWlMEfNkwSR2yCmpfhVgiIOYn9U1SeVq7-ciQm9tbx-uytDGg8w-PekoKeoFjJGtIo0pSHnu94ixaiinbOYC-_FE8\"\r\n}"
+							"raw": "{\r\n    \"email\": \"yudha@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"fcm_token\":\"3NltsH8xnw:APA91bGLR9o0Q8qlarzz16Lwgt2nUzfWlMEfNkwSR2yCmpfhVgiIOYn9U1SeVq7-ciQm9tbx-uytDGg8w-PekoKeoFjJGtIo0pSHnu94ixaiinbOYC-_FE8\"\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
@@ -75,49 +75,6 @@
 								"login"
 							]
 						}
-					},
-					"response": []
-				},
-				{
-					"name": "Profile",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token_jwt}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/profile",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"profile"
-							]
-						},
-						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
 					},
 					"response": []
 				}
@@ -302,21 +259,80 @@
 						"method": "POST",
 						"header": [],
 						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Mengenal Stres dan Cara Mengelolanya\",\r\n    \"url\": \"https://www.youtube.com/watch?v=contoh123\",\r\n    \"thumbnail\": \"https://img.youtube.com/vi/contoh123/0.jpg\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "belajar mengelola stress",
+									"type": "text"
+								},
+								{
+									"key": "url",
+									"value": "https://www.google.com/url?sa=E&source=gmail&q=https://www.youtube.com/watch?v=abc123",
+									"type": "text"
+								},
+								{
+									"key": "thumbnail",
+									"type": "file",
+									"src": "postman-cloud:///1ee9f07a-f2af-46c0-9fa9-64f7b611eb63"
 								}
-							}
+							]
 						},
 						"url": {
-							"raw": "{{base_url}}/education",
+							"raw": "{{base_url}}/educations",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"education"
+								"educations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Education",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "belajar mengelola stress Terbaru",
+									"type": "text"
+								},
+								{
+									"key": "url",
+									"value": "https://www.google.com/url?sa=E&source=gmail&q=https://www.youtube.com/watch?v=abc123",
+									"type": "text"
+								},
+								{
+									"key": "thumbnail",
+									"type": "file",
+									"src": "postman-cloud:///1ee9f07a-f2af-46c0-9fa9-64f7b611eb63"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/educations/3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"educations",
+								"3"
 							]
 						}
 					},
@@ -364,43 +380,6 @@
 						},
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": "{{base_url}}/educations/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"educations",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Education",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Cara Efektif Mengelola Stres (Updated)\",\r\n    \"url\": \"https://www.youtube.com/watch?v=contohDiperbarui\",\r\n    \"thumbnail\": \"https://img.youtube.com/vi/contohDiperbarui/0.jpg\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
 							"raw": "{{base_url}}/educations/1",
 							"host": [
@@ -550,6 +529,84 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get All",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"drug_name\": \"Obat Tes Sore Revisi\", \"dose\": \"1\",\r\n    \"schedule_date\": \"2025-10-23\", \"at_18\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/drug-schedules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"drug-schedules"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get by Id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"drug_name\": \"Obat Tes Sore Revisi\", \"dose\": \"1\",\r\n    \"schedule_date\": \"2025-10-23\", \"at_18\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/drug-schedules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"drug-schedules"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -570,6 +627,40 @@
 							]
 						},
 						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \"control_date\": \"2025-10-24\" }"
+						},
+						"url": {
+							"raw": "{{base_url}}/control-schedules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"control-schedules"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -609,7 +700,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"intake_cc\": 500,\r\n    \"output_cc\": 250\r\n}",
+							"raw": "{\r\n    \"intake_cc\": 300,\r\n    \"output_cc\": 0\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -677,6 +768,40 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
+							"raw": "{ \"schedule_date\": \"2025-10-24\" }"
+						},
+						"url": {
+							"raw": "{{base_url}}/hemodialysis-schedules",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hemodialysis-schedules"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
 							"raw": "{ \"schedule_date\": \"2025-10-23\" }"
 						},
 						"url": {
@@ -716,13 +841,12 @@
 							"raw": "{\r\n    \"bp_before\": \"140/90\",\r\n    \"bp_after\": \"130/85\",\r\n    \"weight_before\": 68.5,\r\n    \"weight_after\": 66.0\r\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/hemodialysis-monitoring/{{hd_schedule_id}}",
+							"raw": "{{base_url}}/hemodialysis-monitoring",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
-								"hemodialysis-monitoring",
-								"{{hd_schedule_id}}"
+								"hemodialysis-monitoring"
 							]
 						}
 					},
@@ -731,6 +855,16 @@
 				{
 					"name": "Get History",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -744,7 +878,222 @@
 							]
 						}
 					},
+					"response": [
+						{
+							"name": "Get History",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/hemodialysis-monitoring/history",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"hemodialysis-monitoring",
+										"history"
+									]
+								}
+							},
+							"_postman_previewlanguage": "",
+							"header": [],
+							"cookie": [],
+							"body": ""
+						}
+					]
+				},
+				{
+					"name": "Get History Copy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/hemodialysis-monitoring/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"hemodialysis-monitoring",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get History",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/hemodialysis-monitoring/history",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"hemodialysis-monitoring",
+										"history"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Profile",
+			"item": [
+				{
+					"name": "Profile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile"
+							]
+						},
+						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+					},
 					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"profile"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Update Name only",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Nama user Baru\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/profile",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"profile"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "Update Password",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"password\": \"password123\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/profile",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"profile"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
 				}
 			]
 		}

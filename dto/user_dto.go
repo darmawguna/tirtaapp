@@ -6,4 +6,11 @@ type UserResponseDTO struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
 	Role  string `json:"role"`
+	PhoneNumber string `json:"phone_number"`
+	ProfilePicture string `json:"profile_picture,omitempty"`
+}
+
+type UpdateProfileDTO struct {
+	Name     *string `json:"name" form:"name" binding:"omitempty"`
+	Password *string `json:"password" form:"password" binding:"omitempty,min=6"`
 }
