@@ -73,7 +73,7 @@ func main() {
 	controlScheduleService := services.NewControlScheduleService(controlScheduleRepo, queueService)
 	hemodialysisScheduleService := services.NewHemodialysisScheduleService(hemodialysisScheduleRepo, queueService)
 	fluidBalanceService := services.NewFluidBalanceService(fluidBalanceRepo, userRepository)
-	hemodialysisMonitoringService := services.NewHemodialysisMonitoringService(hemodialysisMonitoringRepo, hemodialysisScheduleRepo)
+	hemodialysisMonitoringService := services.NewHemodialysisMonitoringService(hemodialysisMonitoringRepo, userRepository)
 	profileService := services.NewProfileService(userRepository)
 	complaintService := services.NewComplaintService(complaintRepository)
 	// (Tambahkan service lain di sini jika ada)
@@ -92,6 +92,7 @@ func main() {
 
 	// --- Tahap 3: Setup Router dan Server ---
 	router := gin.Default()
+	router.Static("/static", "./uploads")
 
 	// Mendaftarkan semua routes
 	routes.SetupAuthRoutes(router, authHandler)

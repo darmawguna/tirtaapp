@@ -1,47 +1,68 @@
 package repositories
 
 import (
-	models "github.com/darmawguna/tirtaapp.git/model" // Adjust path
+	"fmt"
+	"time"
+
+	models "github.com/darmawguna/tirtaapp.git/model" // Sesuaikan path jika berbeda
 	"gorm.io/gorm"
 )
 
+// Interface untuk HemodialysisMonitoringRepository
 type HemodialysisMonitoringRepository interface {
+	FindByUserIDAndDate(userID uint, date time.Time) (models.HemodialysisMonitoring, error)
 	Create(monitoring models.HemodialysisMonitoring) (models.HemodialysisMonitoring, error)
-	FindByScheduleID(scheduleID uint) (models.HemodialysisMonitoring, error)
+	Update(monitoring models.HemodialysisMonitoring) (models.HemodialysisMonitoring, error)
 	FindHistoryByUserID(userID uint, limit int) ([]models.HemodialysisMonitoring, error)
+	FindByID(id uint) (models.HemodialysisMonitoring, error)
 }
 
+// Implementasi repository
 type hemodialysisMonitoringRepository struct {
 	db *gorm.DB
 }
 
+// Constructor
 func NewHemodialysisMonitoringRepository(db *gorm.DB) HemodialysisMonitoringRepository {
 	return &hemodialysisMonitoringRepository{db: db}
 }
 
-func (r *hemodialysisMonitoringRepository) Create(monitoring models.HemodialysisMonitoring) (models.HemodialysisMonitoring, error) {
-	// Using FirstOrCreate to prevent duplicate entries for the same schedule ID
-	err := r.db.Where(models.HemodialysisMonitoring{HemodialysisScheduleID: monitoring.HemodialysisScheduleID}).
-		Attrs(monitoring).               // Attributes only used if record is created
-		FirstOrCreate(&monitoring).Error // Finds or creates based on ScheduleID
-	return monitoring, err
-}
-
-func (r *hemodialysisMonitoringRepository) FindByScheduleID(scheduleID uint) (models.HemodialysisMonitoring, error) {
+// FindByUserIDAndDate mencari data monitoring berdasarkan user dan tanggal (UTC)
+func (r *hemodialysisMonitoringRepository) FindByUserIDAndDate(userID uint, date time.Time) (models.HemodialysisMonitoring, error) {
 	var monitoring models.HemodialysisMonitoring
-	// Preload the schedule to easily get the date later
-	err := r.db.Preload("HemodialysisSchedule").Where("hemodialysis_schedule_id = ?", scheduleID).First(&monitoring).Error
+	// Gunakan DATE() SQL untuk perbandingan tanggal yang andal
+	err := r.db.Where("user_id = ? AND DATE(monitoring_date) = DATE(?)", userID, date.UTC()).First(&monitoring).Error
 	return monitoring, err
 }
 
+// Create: Fungsi sederhana untuk INSERT
+func (r *hemodialysisMonitoringRepository) Create(monitoring models.HemodialysisMonitoring) (models.HemodialysisMonitoring, error) {
+	err := r.db.Create(&monitoring).Error
+	if err != nil {
+		return models.HemodialysisMonitoring{}, fmt.Errorf("gagal create monitoring: %w", err)
+	}
+	return monitoring, nil
+}
+
+// Update: Fungsi sederhana untuk UPDATE
+func (r *hemodialysisMonitoringRepository) Update(monitoring models.HemodialysisMonitoring) (models.HemodialysisMonitoring, error) {
+	// Gunakan Save karena monitoring sudah memiliki ID yang valid
+	err := r.db.Save(&monitoring).Error
+	if err != nil {
+		return models.HemodialysisMonitoring{}, fmt.Errorf("gagal update monitoring: %w", err)
+	}
+	return monitoring, nil
+}
+
+// FindHistoryByUserID mengambil riwayat
 func (r *hemodialysisMonitoringRepository) FindHistoryByUserID(userID uint, limit int) ([]models.HemodialysisMonitoring, error) {
 	var monitorings []models.HemodialysisMonitoring
-	// Preload schedule and order by its date
-	err := r.db.Preload("HemodialysisSchedule").
-		Joins("JOIN hemodialysis_schedules on hemodialysis_schedules.id = hemodialysis_monitorings.hemodialysis_schedule_id").
-		Where("hemodialysis_monitorings.user_id = ?", userID).
-		Order("hemodialysis_schedules.schedule_date desc").
-		Limit(limit).
-		Find(&monitorings).Error
+	err := r.db.Where("user_id = ?", userID).Order("monitoring_date desc").Limit(limit).Find(&monitorings).Error
 	return monitorings, err
+}
+
+func (r *hemodialysisMonitoringRepository) FindByID(id uint) (models.HemodialysisMonitoring, error) {
+	var monitoring models.HemodialysisMonitoring
+	err := r.db.First(&monitoring, id).Error // Cari berdasarkan Primary Key 'id'
+	return monitoring, err
 }
