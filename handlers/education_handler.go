@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"mime/multipart"
@@ -17,6 +18,7 @@ import (
 	"github.com/darmawguna/tirtaapp.git/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper" // Untuk base URL
+	"gorm.io/gorm"
 )
 
 const UPLOAD_PATH_EDUCATION = "./uploads/educations" // Definisikan path upload
@@ -62,9 +64,17 @@ func (h *EducationHandler) GetAll(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("Failed to fetch educations", err.Error()))
 		return
 	}
-	c.JSON(http.StatusOK, utils.SuccessResponse("Educations fetched successfully", educations))
+
+	// [PEMBARUAN] Konversi list model ke list DTO response
+	var responseDTOs []dto.EducationResponseDTO
+	for _, edu := range educations {
+		responseDTOs = append(responseDTOs, toEducationResponseDTO(edu))
+	}
+
+	c.JSON(http.StatusOK, utils.SuccessResponse("Educations fetched successfully", responseDTOs)) // Kirim DTO list
 }
 
+// GetByID (Diperbarui)
 func (h *EducationHandler) GetByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -74,10 +84,18 @@ func (h *EducationHandler) GetByID(c *gin.Context) {
 
 	education, err := h.educationService.FindByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, utils.ErrorResponse("Education not found", err.Error()))
+		// [PEMBARUAN] Cek error record not found dari GORM
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, utils.ErrorResponse("Education not found", nil))
+		} else {
+			c.JSON(http.StatusInternalServerError, utils.ErrorResponse("Failed to fetch education", err.Error()))
+		}
 		return
 	}
-	c.JSON(http.StatusOK, utils.SuccessResponse("Education fetched successfully", education))
+
+	// [PEMBARUAN] Konversi ke DTO response sebelum mengirim
+	responseDTO := toEducationResponseDTO(education)
+	c.JSON(http.StatusOK, utils.SuccessResponse("Education fetched successfully", responseDTO)) // Kirim DTO
 }
 
 // Create: Menangani upload file dan data form
