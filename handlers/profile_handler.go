@@ -39,7 +39,7 @@ func toUserResponseDTO(user models.User) dto.UserResponseDTO {
 	profilePictureUrl := ""
 	if user.ProfilePicture != "" {
 		// Asumsi path relatif disimpan di DB, buat URL lengkap
-		baseUrl := viper.GetString("APP_BASE_URL")
+		baseUrl := viper.GetString("BASE_URL")
 		if baseUrl == "" { baseUrl = "http://localhost:8080" } // Fallback
 		// Sesuaikan "/static/profiles/" jika path serving berbeda
 		profilePictureUrl = fmt.Sprintf("%s/static/profiles/%s", baseUrl, filepath.Base(user.ProfilePicture))

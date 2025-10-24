@@ -40,7 +40,7 @@ func toEducationResponseDTO(edu models.Education) dto.EducationResponseDTO {
 	if !strings.HasPrefix(thumbnailUrl, "http") {
 		// Asumsi Anda akan setup static file serving di /static
 		// Ganti "http://localhost:8080" dengan base URL API Anda dari config
-		baseUrl := viper.GetString("APP_BASE_URL") // Tambahkan APP_BASE_URL=http://localhost:8080 ke .env
+		baseUrl := viper.GetString("BASE_URL") // Tambahkan APP_BASE_URL=http://localhost:8080 ke .env
 		if baseUrl == "" {
 			baseUrl = "http://localhost:8080"
 		} // Fallback
