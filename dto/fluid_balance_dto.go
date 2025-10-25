@@ -1,9 +1,8 @@
 package dto
 
 type CreateOrUpdateFluidLogDTO struct {
-	IntakeCC int `json:"intake_cc" binding:"required,min=0"`
-	OutputCC int `json:"output_cc" binding:"required,min=0"`
-	// Tanggal akan diambil dari server saat request diterima
+	IntakeCC *int `json:"intake_cc" binding:"required,min=0"`
+	OutputCC *int `json:"output_cc" binding:"required,min=0"`
 }
 
 type FluidBalanceLogResponseDTO struct {

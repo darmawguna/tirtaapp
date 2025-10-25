@@ -18,7 +18,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Dhanan\",\r\n    \"email\": \"dhanan@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"timezone\": \"Asia/Makassar\",\r\n    \"phone_number\" : \"085855195909\"\r\n    // \"role\" : \"admin\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Yudhi\",\r\n    \"email\": \"yudhi@example.com\",\r\n    \"password\": \"password123\",\r\n    \"timezone\": \"Asia/Makassar\",\r\n    \"phone_number\" : \"085855195909\",\r\n    \"role\" : \"admin\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -63,7 +63,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"dhanan@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"fcm_token\":\"3NltsH8xnw:APA91bGLR9o0Q8qlarzz16Lwgt2nUzfWlMEfNkwSR2yCmpfhVgiIOYn9U1SeVq7-ciQm9tbx-uytDGg8w-PekoKeoFjJGtIo0pSHnu94ixaiinbOYC-_FE8\",\r\n    \"timezone\" : \"Asia/Jakarta\"\r\n}"
+							"raw": "{\r\n    \"email\": \"darma3@example.com\",\r\n    \"password\": \"password123\",\r\n    \"fcm_token\":\"3c2N1TVx4TlW-INDBfnT_DZ:APA91bGFaNfGz5bTKUDtczU8OJODS_j-I5zCml27Gih-6F6b1ZWS8djJYYo6BUv7t6yQNedOIHKaAmdKnJxrCCRS9D1uBNfFEh2DSOHoWVErlXo5i9qr4C0\",\r\n    \"timezone\" : \"Asia/Jakarta\"\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
@@ -181,13 +181,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{base_url}}/quizzes/1",
+							"raw": "{{base_url}}/quizzes/11",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"quizzes",
-								"1"
+								"11"
 							]
 						}
 					},
@@ -263,7 +263,7 @@
 							"formdata": [
 								{
 									"key": "name",
-									"value": "belajar mengelola stress",
+									"value": "belajar mengelola stress Terbaru",
 									"type": "text"
 								},
 								{
@@ -346,7 +346,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{user_token}}",
+									"value": "{{admin_token}}",
 									"type": "string"
 								}
 							]
@@ -980,7 +980,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "{{user_token}}",
+									"value": "{{admin_token}}",
 									"type": "string"
 								}
 							]
@@ -1020,7 +1020,7 @@
 							"formdata": [
 								{
 									"key": "name",
-									"value": "Denish Gunawan",
+									"value": "Darma Wiguna",
 									"type": "text"
 								},
 								{
