@@ -40,6 +40,14 @@ func (s *fluidBalanceService) CreateOrUpdateLog(userID uint, input dto.CreateOrU
 	var finalLog models.FluidBalanceLog
 	var repoErr error
 
+	var intakeVal, outputVal int
+    if input.IntakeCC != nil { // Cek nil sebelum dereference
+        intakeVal = *input.IntakeCC
+    }
+    if input.OutputCC != nil { // Cek nil sebelum dereference
+        outputVal = *input.OutputCC
+    }
+	
 	if err != nil {
 		// Jika error BUKAN karena tidak ditemukan, kembalikan error
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -51,8 +59,8 @@ func (s *fluidBalanceService) CreateOrUpdateLog(userID uint, input dto.CreateOrU
 		newLog := models.FluidBalanceLog{
 			UserID:   userID,
 			LogDate:  todayUTC,
-			IntakeCC: input.IntakeCC,
-			OutputCC: input.OutputCC,
+			IntakeCC: intakeVal,
+			OutputCC: outputVal,
 		}
 		newLog.BalanceCC = newLog.IntakeCC - newLog.OutputCC
 		// Terapkan warning jika perlu
@@ -67,8 +75,8 @@ func (s *fluidBalanceService) CreateOrUpdateLog(userID uint, input dto.CreateOrU
 		// --- Kasus 2: Record sudah ada -> Update ---
 		log.Println("Existing log found for today (ID:", existingLog.ID, "). Updating.")
 		// Akumulasi nilai
-		existingLog.IntakeCC += input.IntakeCC
-		existingLog.OutputCC += input.OutputCC
+		existingLog.IntakeCC += intakeVal
+		existingLog.OutputCC += outputVal
 		// Hitung ulang balance & warning
 		existingLog.BalanceCC = existingLog.IntakeCC - existingLog.OutputCC
 		existingLog.WarningMessage = "" // Reset warning
