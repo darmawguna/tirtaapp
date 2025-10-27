@@ -11,7 +11,6 @@ import (
 	models "github.com/darmawguna/tirtaapp.git/model" // Adjust path if needed
 	"github.com/darmawguna/tirtaapp.git/repositories"
 	"github.com/darmawguna/tirtaapp.git/services"
-	"github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
@@ -29,6 +28,8 @@ type Worker struct {
 
 // Error khusus untuk memicu requeue via DLX
 var ErrRequeueMessage = errors.New("requeue message for later via DLX")
+var daysID = [...]string{"Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"}
+var monthsID = [...]string{"", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"}
 
 // Constructor untuk Worker
 func NewWorker() (*Worker, error) {
@@ -102,7 +103,9 @@ func (w *Worker) MessageHandler(body []byte) error {
 
 		devices, _ := w.deviceRepo.FindAllByUserID(user.ID)
 		title := "🗓️ Pengingat Jadwal Kontrol"
-		body := fmt.Sprintf("Jangan lupa, Anda memiliki jadwal kontrol besok (%s).", schedule.ControlDate.Format("02 Jan 2006"))
+		// [FORMATTING] Gunakan helper formatDateID
+		formattedDate := formatDateID(schedule.ControlDate)
+		body := fmt.Sprintf("Jangan lupa, Anda memiliki jadwal kontrol besok (%s).", formattedDate)
 
 		w.sendToDevices(devices, title, body)
 		schedule.NotificationSent = true
@@ -123,7 +126,9 @@ func (w *Worker) MessageHandler(body []byte) error {
 
 		devices, _ := w.deviceRepo.FindAllByUserID(user.ID)
 		title := "🩸 Pengingat Jadwal Hemodialisa"
-		body := fmt.Sprintf("Jangan lupa, Anda memiliki jadwal hemodialisa besok (%s).", schedule.ScheduleDate.Format("02 Jan 2006"),)
+		// [FORMATTING] Gunakan helper formatDateID
+		formattedDate := formatDateID(schedule.ScheduleDate)
+		body := fmt.Sprintf("Jangan lupa, Anda memiliki jadwal hemodialisa besok (%s).", formattedDate)
 
 		w.sendToDevices(devices, title, body)
 		schedule.NotificationSent = true
@@ -132,7 +137,7 @@ func (w *Worker) MessageHandler(body []byte) error {
 			return err
 		}
 	}
-	return nil // Sukses
+	return nil // Sukses// Sukses
 }
 
 // --- Logika Cron Job ---
@@ -249,16 +254,28 @@ func isDrugNotificationSent(schedule models.DrugSchedule, timeSlot int) bool {
 	}
 }
 
-// Fungsi ini tidak butuh akses Worker struct, bisa tetap jadi fungsi biasa
-func connectRabbitMQ() (*amqp091.Connection, *amqp091.Channel, error) {
-	user := viper.GetString("RABBITMQ_USER")
-	pass := viper.GetString("RABBITMQ_PASS")
-	host := viper.GetString("RABBITMQ_HOST")
-	port := viper.GetString("RABBITMQ_PORT")
-	connStr := fmt.Sprintf("amqp://%s:%s@%s:%s/", user, pass, host, port)
-	conn, err := amqp091.Dial(connStr)
-	if err != nil { return nil, nil, err }
-	ch, err := conn.Channel()
-	if err != nil { return nil, nil, err }
-	return conn, ch, nil
+func formatDateID(t time.Time) string {
+	// Dapatkan nama hari dan bulan dalam bahasa Inggris
+	dayNameEN := t.Format("Monday")
+	monthNameEN := t.Format("January")
+
+	// Terjemahkan ke Bahasa Indonesia
+	dayNameID := ""
+	for i, dayEN := range [...]string{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"} {
+		if dayEN == dayNameEN {
+			dayNameID = daysID[i]
+			break
+		}
+	}
+
+	monthNameID := ""
+	for i, monthEN := range [...]string{"", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"} {
+		if monthEN == monthNameEN {
+			monthNameID = monthsID[i]
+			break
+		}
+	}
+
+	// Format ulang string (contoh: Selasa, 28 Oktober 2025)
+	return fmt.Sprintf("%s, %d %s %d", dayNameID, t.Day(), monthNameID, t.Year())
 }
