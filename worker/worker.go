@@ -24,6 +24,7 @@ type Worker struct {
 	drugScheduleRepo         repositories.DrugScheduleRepository
 	controlScheduleRepo      repositories.ControlScheduleRepository
 	hemodialysisScheduleRepo repositories.HemodialysisScheduleRepository
+	medicationRefillRepo     repositories.MedicationRefillRepository
 }
 
 // Error khusus untuk memicu requeue via DLX
@@ -38,6 +39,7 @@ func NewWorker() (*Worker, error) {
 	config.RunMigration(db,
 		&models.User{}, &models.Device{}, &models.DrugSchedule{},
 		&models.ControlSchedule{}, &models.HemodialysisSchedule{}, &models.HemodialysisMonitoring{},
+		&models.MedicationRefillSchedule{},
 	)
 
 	// Inisialisasi Firebase
@@ -55,6 +57,7 @@ func NewWorker() (*Worker, error) {
 		drugScheduleRepo:         repositories.NewDrugScheduleRepository(db),
 		controlScheduleRepo:      repositories.NewControlScheduleRepository(db),
 		hemodialysisScheduleRepo: repositories.NewHemodialysisScheduleRepository(db),
+		medicationRefillRepo:     repositories.NewMedicationRefillRepository(db),
 	}
 	log.Println("Worker dependencies initialized.")
 	return w, nil
@@ -76,30 +79,44 @@ func (w *Worker) MessageHandler(body []byte) error {
 	switch msg.ScheduleType {
 	case "DRUG":
 		schedule, err := w.drugScheduleRepo.FindByID(msg.ScheduleID)
-		if err != nil { return nil }
-		if !schedule.IsActive || isDrugNotificationSent(schedule, msg.TimeSlot) { return nil }
+		if err != nil {
+			return nil
+		}
+		if !schedule.IsActive || isDrugNotificationSent(schedule, msg.TimeSlot) {
+			return nil
+		}
 
 		reminderTime := time.Date(scheduleDate.Year(), scheduleDate.Month(), scheduleDate.Day(), msg.TimeSlot, 0, 0, 0, location)
 		notificationTime := reminderTime.Add(-1 * time.Hour)
 
-		if time.Now().Before(notificationTime) { return ErrRequeueMessage }
+		if time.Now().Before(notificationTime) {
+			return ErrRequeueMessage
+		}
 
 		devices, _ := w.deviceRepo.FindAllByUserID(user.ID)
 		title := "💊 Pengingat Minum Obat"
 		body := fmt.Sprintf("Saatnya minum obat %s (dosis: %s) pada pukul %02d:00.", schedule.DrugName, schedule.Dose, msg.TimeSlot)
 
 		w.sendToDevices(devices, title, body)
-		if err := w.updateDrugSentStatus(schedule, msg.TimeSlot); err != nil { return err }
+		if err := w.updateDrugSentStatus(schedule, msg.TimeSlot); err != nil {
+			return err
+		}
 
 	case "KONTROL":
 		schedule, err := w.controlScheduleRepo.FindByID(msg.ScheduleID)
-		if err != nil { return nil }
-		if !schedule.IsActive || schedule.NotificationSent { return nil }
+		if err != nil {
+			return nil
+		}
+		if !schedule.IsActive || schedule.NotificationSent {
+			return nil
+		}
 
 		scheduleTime := time.Date(scheduleDate.Year(), scheduleDate.Month(), scheduleDate.Day(), 7, 0, 0, 0, location)
 		notificationTime := scheduleTime.AddDate(0, 0, -1)
 
-		if time.Now().Before(notificationTime) { return ErrRequeueMessage }
+		if time.Now().Before(notificationTime) {
+			return ErrRequeueMessage
+		}
 
 		devices, _ := w.deviceRepo.FindAllByUserID(user.ID)
 		title := "🗓️ Pengingat Jadwal Kontrol"
@@ -116,13 +133,19 @@ func (w *Worker) MessageHandler(body []byte) error {
 
 	case "HEMODIALISA":
 		schedule, err := w.hemodialysisScheduleRepo.FindByID(msg.ScheduleID)
-		if err != nil { return nil }
-		if !schedule.IsActive || schedule.NotificationSent { return nil }
+		if err != nil {
+			return nil
+		}
+		if !schedule.IsActive || schedule.NotificationSent {
+			return nil
+		}
 
 		scheduleTime := time.Date(scheduleDate.Year(), scheduleDate.Month(), scheduleDate.Day(), 7, 0, 0, 0, location)
 		notificationTime := scheduleTime.AddDate(0, 0, -1)
 
-		if time.Now().Before(notificationTime) { return ErrRequeueMessage }
+		if time.Now().Before(notificationTime) {
+			return ErrRequeueMessage
+		}
 
 		devices, _ := w.deviceRepo.FindAllByUserID(user.ID)
 		title := "🩸 Pengingat Jadwal Hemodialisa"
@@ -136,6 +159,33 @@ func (w *Worker) MessageHandler(body []byte) error {
 			log.Printf("ERROR: Failed to update sent status for hemodialysis schedule ID %d: %v", schedule.ID, err)
 			return err
 		}
+	case "OBAT_HABIS":
+		schedule, err := w.medicationRefillRepo.FindByID(msg.ScheduleID)
+		if err != nil {
+			return nil
+		} // Pesan diabaikan jika jadwal tidak ada
+		if !schedule.IsActive || schedule.NotificationSent {
+			return nil
+		} // Cek flag
+		// Logika H-1, jam 7 pagi (sama seperti Kontrol)
+		scheduleTime := time.Date(scheduleDate.Year(), scheduleDate.Month(), scheduleDate.Day(), 7, 0, 0, 0, location)
+		notificationTime := scheduleTime.AddDate(0, 0, -1) // H-1
+		if time.Now().Before(notificationTime) {
+			return ErrRequeueMessage
+		}
+
+		devices, _ := w.deviceRepo.FindAllByUserID(user.ID)
+		title := "🔔 Pengingat Obat Habis"
+		formattedDate := formatDateID(schedule.RefillDate) // Gunakan helper format tanggal
+		body := fmt.Sprintf("Jangan lupa, jadwal Anda mengambil obat  adalah besok (%s).",formattedDate)
+
+		w.sendToDevices(devices, title, body)
+		// Tandai sebagai terkirim
+		schedule.NotificationSent = true
+		if _, err := w.medicationRefillRepo.Update(schedule); err != nil {
+			log.Printf("ERROR: Failed to update sent status for refill schedule ID %d: %v", schedule.ID, err)
+			return err
+		}
 	}
 	return nil // Sukses// Sukses
 }
@@ -145,23 +195,39 @@ func (w *Worker) SendDailyMonitoringReminders() {
 	log.Println("Cron Job: Running daily check for Hemodialysis monitoring reminders...")
 
 	serverTimezone := viper.GetString("SERVER_TIMEZONE")
-	if serverTimezone == "" { serverTimezone = "Asia/Makassar"; log.Println("WARNING: SERVER_TIMEZONE not set...") }
+	if serverTimezone == "" {
+		serverTimezone = "Asia/Makassar"
+		log.Println("WARNING: SERVER_TIMEZONE not set...")
+	}
 	location, err := time.LoadLocation(serverTimezone)
-	if err != nil { log.Printf("Cron Job ERROR: Invalid SERVER_TIMEZONE..."); location, _ = time.LoadLocation("UTC") }
+	if err != nil {
+		log.Printf("Cron Job ERROR: Invalid SERVER_TIMEZONE...")
+		location, _ = time.LoadLocation("UTC")
+	}
 
 	now := time.Now().In(location)
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, location)
 
 	schedules, err := w.hemodialysisScheduleRepo.FindSchedulesForDateAndNotNotified(today)
-	if err != nil { log.Printf("Cron Job ERROR: checking daily schedules: %v", err); return }
-	if len(schedules) == 0 { log.Println("Cron Job: No monitoring reminders to send today."); return }
+	if err != nil {
+		log.Printf("Cron Job ERROR: checking daily schedules: %v", err)
+		return
+	}
+	if len(schedules) == 0 {
+		log.Println("Cron Job: No monitoring reminders to send today.")
+		return
+	}
 
 	log.Printf("Cron Job: Found %d schedules...", len(schedules))
 	for _, schedule := range schedules {
-		if !schedule.IsActive { continue }
+		if !schedule.IsActive {
+			continue
+		}
 
 		devices, err := w.deviceRepo.FindAllByUserID(schedule.UserID)
-		if err != nil || len(devices) == 0 { continue }
+		if err != nil || len(devices) == 0 {
+			continue
+		}
 
 		title := "🩸 Pengingat Pemantauan Hemodialisa"
 		body := "Jangan lupa untuk mengisi data pemantauan hemodialisis hari ini, ya."
@@ -186,28 +252,43 @@ func (w *Worker) getUserAndTimezone(msg services.ReminderMessage) (models.User, 
 	switch msg.ScheduleType {
 	case "DRUG":
 		schedule, err := w.drugScheduleRepo.FindByID(msg.ScheduleID)
-		if err != nil { return models.User{}, nil, time.Time{}, fmt.Errorf("schedule not found") }
+		if err != nil {
+			return models.User{}, nil, time.Time{}, fmt.Errorf("schedule not found")
+		}
 		userID = schedule.UserID
 		scheduleDate = schedule.ScheduleDate
 	case "KONTROL":
 		schedule, err := w.controlScheduleRepo.FindByID(msg.ScheduleID)
-		if err != nil { return models.User{}, nil, time.Time{}, fmt.Errorf("schedule not found") }
+		if err != nil {
+			return models.User{}, nil, time.Time{}, fmt.Errorf("schedule not found")
+		}
 		userID = schedule.UserID
 		scheduleDate = schedule.ControlDate
 	case "HEMODIALISA":
 		schedule, err := w.hemodialysisScheduleRepo.FindByID(msg.ScheduleID)
-		if err != nil { return models.User{}, nil, time.Time{}, fmt.Errorf("schedule not found") }
+		if err != nil {
+			return models.User{}, nil, time.Time{}, fmt.Errorf("schedule not found")
+		}
 		userID = schedule.UserID
 		scheduleDate = schedule.ScheduleDate
+	case "OBAT_HABIS":
+		schedule, err := w.medicationRefillRepo.FindByID(msg.ScheduleID)
+		if err != nil { return models.User{}, nil, time.Time{}, fmt.Errorf("schedule not found") }
+		userID = schedule.UserID
+		scheduleDate = schedule.RefillDate 
 	default:
 		return models.User{}, nil, time.Time{}, fmt.Errorf("unknown schedule type: %s", msg.ScheduleType)
 	}
 
 	user, err := w.userRepo.FindByID(userID)
-	if err != nil { return models.User{}, nil, time.Time{}, fmt.Errorf("user not found") }
+	if err != nil {
+		return models.User{}, nil, time.Time{}, fmt.Errorf("user not found")
+	}
 
 	location, err := time.LoadLocation(user.Timezone)
-	if err != nil { location, _ = time.LoadLocation("UTC") }
+	if err != nil {
+		location, _ = time.LoadLocation("UTC")
+	}
 
 	nowInUserLocation := time.Now().In(location)
 	todayInUserLocation := time.Date(nowInUserLocation.Year(), nowInUserLocation.Month(), nowInUserLocation.Day(), 0, 0, 0, 0, location)
@@ -233,13 +314,20 @@ func (w *Worker) sendToDevices(devices []models.Device, title, body string) {
 
 func (w *Worker) updateDrugSentStatus(schedule models.DrugSchedule, timeSlot int) error {
 	switch timeSlot {
-	case 6: schedule.At06Sent = true
-	case 12: schedule.At12Sent = true
-	case 18: schedule.At18Sent = true
-	default: return fmt.Errorf("invalid time slot %d", timeSlot)
+	case 6:
+		schedule.At06Sent = true
+	case 12:
+		schedule.At12Sent = true
+	case 18:
+		schedule.At18Sent = true
+	default:
+		return fmt.Errorf("invalid time slot %d", timeSlot)
 	}
 	_, err := w.drugScheduleRepo.Update(schedule)
-	if err != nil { log.Printf("ERROR: Failed to update drug sent status for ID %d: %v", schedule.ID, err); return err }
+	if err != nil {
+		log.Printf("ERROR: Failed to update drug sent status for ID %d: %v", schedule.ID, err)
+		return err
+	}
 	return nil
 }
 
@@ -247,10 +335,14 @@ func (w *Worker) updateDrugSentStatus(schedule models.DrugSchedule, timeSlot int
 // Fungsi ini tidak butuh akses Worker struct, bisa tetap jadi fungsi biasa
 func isDrugNotificationSent(schedule models.DrugSchedule, timeSlot int) bool {
 	switch timeSlot {
-	case 6: return schedule.At06Sent
-	case 12: return schedule.At12Sent
-	case 18: return schedule.At18Sent
-	default: return true
+	case 6:
+		return schedule.At06Sent
+	case 12:
+		return schedule.At12Sent
+	case 18:
+		return schedule.At18Sent
+	default:
+		return true
 	}
 }
 
