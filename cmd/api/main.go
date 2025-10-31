@@ -35,6 +35,7 @@ func main() {
 		&models.User{}, &models.Quiz{}, &models.Education{}, &models.ComplaintLog{},
 		&models.DrugSchedule{}, &models.ControlSchedule{}, &models.HemodialysisSchedule{},
 		&models.Device{}, &models.FluidBalanceLog{}, &models.HemodialysisMonitoring{},
+		&models.MedicationRefillSchedule{},
 	)
 
 	// Inisialisasi Queue Service (RabbitMQ)
@@ -63,6 +64,7 @@ func main() {
 	fluidBalanceRepo := repositories.NewFluidBalanceRepository(db)
 	hemodialysisMonitoringRepo := repositories.NewHemodialysisMonitoringRepository(db)
 	complaintRepository := repositories.NewComplaintRepository(db)
+	medicationRefillStory := repositories.NewMedicationRefillRepository(db)
 	// (Tambahkan repository lain di sini jika ada)
 
 	deviceService := services.NewDeviceService(deviceRepository)
@@ -76,6 +78,7 @@ func main() {
 	hemodialysisMonitoringService := services.NewHemodialysisMonitoringService(hemodialysisMonitoringRepo, userRepository)
 	profileService := services.NewProfileService(userRepository)
 	complaintService := services.NewComplaintService(complaintRepository)
+	medicationReffilService := services.NewMedicationRefillService( medicationRefillStory, queueService)
 	// (Tambahkan service lain di sini jika ada)
 
 	authHandler := handlers.NewAuthHandler(authService)
@@ -88,6 +91,7 @@ func main() {
 	hemodialysisMonitoringHandler := handlers.NewHemodialysisMonitoringHandler(hemodialysisMonitoringService)
 	profileHandler := handlers.NewProfileHandler(profileService)
 	complaintHandler := handlers.NewComplaintHandler(complaintService)
+	medicationReffilHandler := handlers.NewMedicationRefillHandler(medicationReffilService)
 	// (Tambahkan handler lain di sini jika ada)
 
 	// --- Tahap 3: Setup Router dan Server ---
@@ -106,6 +110,7 @@ func main() {
 	routes.SetupHemodialysisMonitoringRoutes(router,hemodialysisMonitoringHandler)
 	routes.SetupProfileRoutes(router, profileHandler)
 	routes.SetupComplaintRoutes(router, complaintHandler)
+	routes.SetupMedicationRefillRoutes(router, medicationReffilHandler)
 
 	// (Tambahkan pendaftaran route lain di sini)
 
