@@ -17,4 +17,11 @@ func SetupProfileRoutes(router *gin.Engine, handler *handlers.ProfileHandler) {
 		profileRoutes.GET("/profile", handler.GetProfile)
 		profileRoutes.PUT("/profile", handler.UpdateProfile)
 	}
+
+	adminRoutes := router.Group("/api/v1/admin")
+	adminRoutes.Use(middlewares.AuthMiddleware())   // Pertama, pastikan login
+	adminRoutes.Use(middlewares.AdminMiddleware()) // Kedua, pastikan adalah admin
+	{
+		adminRoutes.GET("/users/count", handler.GetUserCount)
+	}
 }

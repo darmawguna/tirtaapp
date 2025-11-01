@@ -12,6 +12,7 @@ type UserRepository interface {
 	FindByID(id uint) (models.User, error) 
 	Update(user models.User) (models.User, error)
 	UpdateTimeZone (user models.User) (models.User, error)
+	CountByRole(role string) (int64, error)
 }
 
 type userRepository struct {
@@ -73,4 +74,10 @@ func (r *userRepository) UpdateTimeZone(user models.User) (models.User, error) {
 	// Kembalikan objek user (meskipun tidak diperbarui oleh GORM Update,
 	// kita kembalikan inputnya karena sudah berisi timezone baru)
 	return user, nil
+}
+func (r *userRepository) CountByRole(role string) (int64, error) {
+	var count int64
+	// Menghitung record di tabel 'users' yang cocok dengan 'role'
+	err := r.db.Model(&models.User{}).Where("role = ?", role).Count(&count).Error
+	return count, err
 }

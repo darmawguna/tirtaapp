@@ -143,3 +143,17 @@ func saveUploadedProfileFile(c *gin.Context, file *multipart.FileHeader, destDir
 
 	return dst, nil
 }
+
+func (h *ProfileHandler) GetUserCount(c *gin.Context) {
+	// Panggil service untuk menghitung
+	count, err := h.profileService.CountRegularUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("Gagal mengambil jumlah pengguna", err.Error()))
+		return
+	}
+	// Kirim response sukses dengan data jumlah
+	c.JSON(http.StatusOK, utils.SuccessResponse("Jumlah pengguna berhasil diambil", gin.H{
+		"role":  "user",
+		"count": count,
+	}))
+}
