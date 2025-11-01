@@ -1138,6 +1138,38 @@
 					"response": []
 				},
 				{
+					"name": "Update Jadwal",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refill_date\": \"2025-11-10\",\r\n    \"is_active\": true\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medication-refills/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medication-refills",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get All",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -1167,6 +1199,41 @@
 							"path": [
 								"medication-refills",
 								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get by Id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/medication-refills/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"medication-refills",
+								"1"
 							]
 						}
 					},

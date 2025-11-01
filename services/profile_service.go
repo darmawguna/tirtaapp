@@ -16,6 +16,7 @@ import (
 type ProfileService interface {
 	GetProfile(userID uint) (models.User, error)
 	UpdateProfile(userID uint, input dto.UpdateProfileDTO, profilePicturePath *string) (models.User, error)
+	CountRegularUsers() (int64, error)
 }
 
 // profileService adalah implementasi dari ProfileService.
@@ -93,4 +94,13 @@ func (s *profileService) UpdateProfile(userID uint, input dto.UpdateProfileDTO, 
 	}
 
 	return updatedUser, nil
+}
+
+func (s *profileService) CountRegularUsers() (int64, error) {
+	// Memanggil repository untuk menghitung pengguna dengan role "user"
+	count, err := s.userRepo.CountByRole("user")
+	if err != nil {
+		return 0, fmt.Errorf("gagal menghitung pengguna: %w", err)
+	}
+	return count, nil
 }
