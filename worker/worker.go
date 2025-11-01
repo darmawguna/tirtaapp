@@ -177,7 +177,7 @@ func (w *Worker) MessageHandler(body []byte) error {
 		devices, _ := w.deviceRepo.FindAllByUserID(user.ID)
 		title := "🔔 Pengingat Obat Habis"
 		formattedDate := formatDateID(schedule.RefillDate) // Gunakan helper format tanggal
-		body := fmt.Sprintf("Jangan lupa, jadwal Anda mengambil obat  adalah besok (%s).",formattedDate)
+		body := fmt.Sprintf(" Selamat pagi Bapak/Ibu,Besok (%s) merupakan jadwal Bapak/Ibu untuk melakukan pengamprahan persediaan obat. Mohon membawa kartu obat dan menyerahkannya kepada perawat hemodialisis saat datang ke unit 🙏.",formattedDate)
 
 		w.sendToDevices(devices, title, body)
 		// Tandai sebagai terkirim
