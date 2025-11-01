@@ -32,6 +32,9 @@ WORKDIR /app
 COPY --from=builder /out/tirtapp-api /app/tirtapp-api
 
 RUN chown -R nonroot:nonroot /app
+RUN mkdir -p /app/uploads/educations && \
+    mkdir -p /app/uploads/profiles && \
+    chown -R nonroot:nonroot /app/uploads
 
 ENV GIN_MODE=release
 EXPOSE 8080
