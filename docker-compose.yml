@@ -8,6 +8,10 @@ services:
       - "127.0.0.1:8095:8080" # Hanya expose ke localhost VPS
     env_file:
       - ./.env
+    volumes:
+      # [PEMBARUAN] Mount volume 'uploads-data' ke folder '/app/uploads'
+      # Ini adalah folder induk dari '/app/uploads/profiles' dan '/app/uploads/educations'
+      - uploads-data:/app/uploads
     depends_on:
       mysql-db:
         condition: service_healthy # Tunggu DB benar-benar siap
@@ -25,6 +29,7 @@ services:
       # Mount file secret Firebase dari host (VPS) ke dalam container worker
       # Pastikan file ./secrets/firebase-service-account.json ada di VPS
       - ./secrets/firebase-service-account.json:/app/secrets/firebase-service-account.json:ro # :ro = read-only
+      - uploads-data:/app/uploads
     depends_on:
       mysql-db:
         condition: service_healthy # Tunggu DB benar-benar siap
@@ -85,3 +90,4 @@ services:
 volumes:
   db-data: # Volume untuk data MySQL
   rabbitmq-data: # Volume untuk data RabbitMQ
+  uploads-data:
