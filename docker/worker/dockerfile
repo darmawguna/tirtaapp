@@ -34,6 +34,9 @@ COPY --from=builder /out/tirtapp-worker .
 # File secret akan di-mount menggunakan volume di docker-compose.yml.
 # Kita hanya perlu memastikan direktori tujuan mount ada dan memiliki izin yang benar.
 RUN mkdir /app/secrets && chown nonroot:nonroot /app/secrets
+RUN mkdir -p /app/uploads/educations && \
+    mkdir -p /app/uploads/profiles && \
+    chown -R nonroot:nonroot /app/uploads
 
 # Atur kepemilikan binary worker ke user nonroot
 RUN chown nonroot:nonroot ./tirtapp-worker
