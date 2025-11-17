@@ -35,7 +35,7 @@ func (s *authService) Register(input dto.RegisterDTO) (models.User, error) {
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: string(hashedPassword),
-		Role:     input.Role, // Default role
+		Role:     input.Role, 
 		Timezone: input.Timezone,
 		PhoneNumber: input.PhoneNumber,
 	}
