@@ -1,0 +1,15 @@
+{
+  "workspace": {
+    "id": "15f476a9-79fc-42f5-9332-c86a2781e986"
+  },
+  "entities": {
+    "collections": [
+      "..\\collection\\Agro Link API.postman_collection.json",
+      "..\\collection\\Tirtha App.postman_collection.json"
+    ],
+    "environments": [],
+    "specs": [],
+    "flows": [],
+    "globals": []
+  }
+}

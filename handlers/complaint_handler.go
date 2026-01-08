@@ -10,83 +10,77 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// **ComplaintHandler** adalah struct yang menampung service untuk keluhan.
 type ComplaintHandler struct {
 	complaintService services.ComplaintService
 }
 
-// **NewComplaintHandler** adalah constructor untuk ComplaintHandler.
 func NewComplaintHandler(complaintService services.ComplaintService) *ComplaintHandler {
 	return &ComplaintHandler{complaintService: complaintService}
 }
 
-// **Create** menangani pembuatan log keluhan baru.
-// Endpoint: POST /api/v1/complaints
+// POST /api/v1/complaints
 func (h *ComplaintHandler) Create(c *gin.Context) {
 	var input dto.CreateComplaintDTO
-
-	// Binding dan validasi request body.
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response := utils.ErrorResponse("Validation failed. Make sure 'complaints' is a non-empty array.", err.Error())
+		response := utils.ErrorResponse("Validation failed", err.Error())
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	// Ambil ID user dari context yang di-set oleh middleware.
 	userID := c.MustGet("userID").(float64)
 
-	// Panggil service untuk memproses keluhan dan mendapatkan pesan balasan.
-	generatedMessage, err := h.complaintService.ProcessComplaint(uint(userID), input)
+	resp, err := h.complaintService.ProcessComplaint(uint(userID), input)
 	if err != nil {
+		// validation/business errors -> 400
 		response := utils.ErrorResponse("Failed to process complaint", err.Error())
-		c.JSON(http.StatusInternalServerError, response)
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	// Kirim response sukses yang berisi pesan yang dihasilkan.
-	response := utils.SuccessResponse("Complaint processed successfully", gin.H{
-		"generated_message": generatedMessage,
-	})
+	response := utils.SuccessResponse("Complaint processed successfully", resp)
 	c.JSON(http.StatusCreated, response)
 }
 
-// **GetMyComplaints** menangani permintaan untuk melihat riwayat keluhan user.
-// Endpoint: GET /api/v1/complaints
+// GET /api/v1/complaints?phase=pre_hd|post_hd
 func (h *ComplaintHandler) GetMyComplaints(c *gin.Context) {
-	// Ambil ID user dari context.
 	userID := c.MustGet("userID").(float64)
 
-	// Panggil service untuk mendapatkan data riwayat.
-	logs, err := h.complaintService.GetMyComplaints(uint(userID))
+	var phasePtr *dto.ComplaintPhase
+	if phase := c.Query("phase"); phase != "" {
+		p := dto.ComplaintPhase(phase)
+		phasePtr = &p
+	}
+
+	logs, err := h.complaintService.GetMyComplaints(uint(userID), phasePtr)
 	if err != nil {
 		response := utils.ErrorResponse("Failed to fetch complaint history", err.Error())
-		c.JSON(http.StatusInternalServerError, response)
+		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	// Kirim response sukses dengan data riwayat.
 	response := utils.SuccessResponse("Complaint history fetched successfully", logs)
 	c.JSON(http.StatusOK, response)
 }
 
+// GET /api/v1/complaints/:id
 func (h *ComplaintHandler) GetDetailComplaint(c *gin.Context) {
-	// Ambil ID user dari context.
-	complaint_id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	userID := c.MustGet("userID").(float64)
+
+	id64, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		response := utils.ErrorResponse("Invalid ID format", err.Error())
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
 
-	complaint, err := h.complaintService.GetComplainById(uint(complaint_id))
+	complaint, err := h.complaintService.GetComplaintByID(uint(userID), uint(id64))
 	if err != nil {
-		// Jika record tidak ditemukan, GORM akan memberikan error.
-		response := utils.ErrorResponse("Fetching Quiz failed", err.Error())
-		c.JSON(http.StatusBadRequest, response)
+		// For security, treat not found/ownership mismatch as 404 in many designs.
+		response := utils.ErrorResponse("Complaint not found", err.Error())
+		c.JSON(http.StatusNotFound, response)
 		return
 	}
 
-	// Kirim response sukses dengan data riwayat.
-	response := utils.SuccessResponse("Complaint  fetched successfully", complaint)
+	response := utils.SuccessResponse("Complaint fetched successfully", complaint)
 	c.JSON(http.StatusOK, response)
 }
