@@ -10,8 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/darmawguna/tirtaapp.git/utils"
-
 	"github.com/darmawguna/tirtaapp.git/config"
 	"github.com/darmawguna/tirtaapp.git/handlers"
 	models "github.com/darmawguna/tirtaapp.git/model"
@@ -27,7 +25,7 @@ var db *gorm.DB
 
 func main() {
 	// --- Tahap 1: Inisialisasi Konfigurasi & Koneksi ---
-	clearDB := flag.Bool("clear-db", false, "Set this flag to delete all data from the database before starting")
+	// clearDB := flag.Bool("clear-db", false, "Set this flag to delete all data from the database before starting")
 	flag.Parse()
 	config.LoadConfig()
 	db = config.ConnectDB()
@@ -35,7 +33,7 @@ func main() {
 		&models.User{}, &models.Quiz{}, &models.Education{}, &models.ComplaintLog{},
 		&models.DrugSchedule{}, &models.ControlSchedule{}, &models.HemodialysisSchedule{},
 		&models.Device{}, &models.FluidBalanceLog{}, &models.HemodialysisMonitoring{},
-		&models.MedicationRefillSchedule{},
+		&models.MedicationRefillSchedule{}, &models.HemodialysisComplaint{},
 	)
 
 	// Inisialisasi Queue Service (RabbitMQ)
@@ -43,14 +41,13 @@ func main() {
 	if err := queueService.Connect(); err != nil {
 		log.Fatalf("Could not connect to RabbitMQ: %s", err)
 	}
-	if *clearDB {
-		err := utils.ClearAllData(db) // Call the clear function
-		if err != nil {
-			log.Fatalf("FATAL: Could not clear database: %v", err)
-		}
-		log.Println("Database cleared successfully via flag.")
-		// Optional: os.Exit(0) if you only want to clear and not start the server
-	}
+	// if *clearDB {
+	// 	err := utils.ClearAllData(db) // Call the clear function
+	// 	if err != nil {
+	// 		log.Fatalf("FATAL: Could not clear database: %v", err)
+	// 	}
+	// 	log.Println("Database cleared successfully via flag.")
+	// }
 
 	// --- Tahap 2: Dependency Injection ---
 	// Inisialisasi semua layer (Repository, Service, Handler)

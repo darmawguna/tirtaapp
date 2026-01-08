@@ -18,7 +18,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Yudhi\",\r\n    \"email\": \"admin@tirtha.com\",\r\n    \"password\": \"tirtha10272025\",\r\n    \"timezone\": \"Asia/Makassar\",\r\n    \"phone_number\" : \"081933024927\"\r\n    // \"role\" : \"admin\"\r\n}",
+							"raw": "{\r\n    \"name\": \"Darma wiguna\",\r\n    \"email\": \"darmawiguna@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"timezone\": \"Asia/Makassar\",\r\n    \"phone_number\" : \"085855193929\",\r\n    \"role\" : \"user\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1100,6 +1100,42 @@
 							"body": null
 						}
 					]
+				},
+				{
+					"name": "Get All user by ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/users/count",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"users",
+								"count"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
