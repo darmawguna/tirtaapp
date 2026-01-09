@@ -3,13 +3,13 @@ package services
 import (
 	"errors"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/darmawguna/tirtaapp.git/repositories"
 	"github.com/darmawguna/tirtaapp.git/utils"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
@@ -61,7 +61,7 @@ func (s *passwordResetService) ForgotPassword(email string) error {
 	tokenHash := utils.HashTokenSHA256Hex(token)
 
 	expMin := 15
-	if v := os.Getenv("PASSWORD_RESET_EXP_MINUTES"); v != "" {
+	if v := viper.GetString("PASSWORD_RESET_EXP_MINUTES"); v != "" {
 		if n, convErr := strconv.Atoi(v); convErr == nil && n > 0 {
 			expMin = n
 		}
@@ -78,7 +78,7 @@ func (s *passwordResetService) ForgotPassword(email string) error {
 		return err
 	}
 
-	deepLinkBase := os.Getenv("APP_DEEPLINK_BASE")
+	deepLinkBase := viper.GetString("APP_RESET_URL_BASE")
 	if deepLinkBase == "" {
 		deepLinkBase = "https://tirtapp.fmews.com/reset-password?token="
 	}
