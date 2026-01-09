@@ -33,7 +33,7 @@ func main() {
 		&models.User{}, &models.Quiz{}, &models.Education{}, &models.ComplaintLog{},
 		&models.DrugSchedule{}, &models.ControlSchedule{}, &models.HemodialysisSchedule{},
 		&models.Device{}, &models.FluidBalanceLog{}, &models.HemodialysisMonitoring{},
-		&models.MedicationRefillSchedule{}, &models.HemodialysisComplaint{},
+		&models.MedicationRefillSchedule{}, &models.HemodialysisComplaint{}, &models.PasswordReset{},
 	)
 
 	// Inisialisasi Queue Service (RabbitMQ)
@@ -49,6 +49,12 @@ func main() {
 	// 	log.Println("Database cleared successfully via flag.")
 	// }
 
+	// Services
+	mailer, err := services.NewGmailSMTPSenderFromConfig()
+	if err != nil {
+		log.Fatalf("Could not init SMTP sender: %s", err)
+	}
+
 	// --- Tahap 2: Dependency Injection ---
 	// Inisialisasi semua layer (Repository, Service, Handler)
 	userRepository := repositories.NewUserRepository(db)
@@ -62,6 +68,7 @@ func main() {
 	hemodialysisMonitoringRepo := repositories.NewHemodialysisMonitoringRepository(db)
 	complaintRepository := repositories.NewComplaintRepository(db)
 	medicationRefillStory := repositories.NewMedicationRefillRepository(db)
+	passwordResetRepository := repositories.NewPasswordResetRepository(db)
 	// (Tambahkan repository lain di sini jika ada)
 
 	deviceService := services.NewDeviceService(deviceRepository)
@@ -75,7 +82,9 @@ func main() {
 	hemodialysisMonitoringService := services.NewHemodialysisMonitoringService(hemodialysisMonitoringRepo, userRepository)
 	profileService := services.NewProfileService(userRepository)
 	complaintService := services.NewComplaintService(complaintRepository)
-	medicationReffilService := services.NewMedicationRefillService( medicationRefillStory, queueService)
+	medicationReffilService := services.NewMedicationRefillService(medicationRefillStory, queueService)
+	passwordResetService := services.NewPasswordResetService(userRepository, passwordResetRepository, mailer)
+
 	// (Tambahkan service lain di sini jika ada)
 
 	authHandler := handlers.NewAuthHandler(authService)
@@ -89,6 +98,7 @@ func main() {
 	profileHandler := handlers.NewProfileHandler(profileService)
 	complaintHandler := handlers.NewComplaintHandler(complaintService)
 	medicationReffilHandler := handlers.NewMedicationRefillHandler(medicationReffilService)
+	passwordResetHandler := handlers.NewPasswordResetHandler(passwordResetService)
 	// (Tambahkan handler lain di sini jika ada)
 
 	// --- Tahap 3: Setup Router dan Server ---
@@ -97,14 +107,14 @@ func main() {
 	router.Static("/static/educations", "./uploads/educations")
 
 	// Mendaftarkan semua routes
-	routes.SetupAuthRoutes(router, authHandler)
+	routes.SetupAuthRoutes(router, authHandler, passwordResetHandler)
 	routes.SetupDrugScheduleRoutes(router, drugScheduleHandler)
-	routes.SetupQuizRoutes(router,quizHandler)
+	routes.SetupQuizRoutes(router, quizHandler)
 	routes.SetupEducationRoutes(router, educationHandler)
 	routes.SetupControlScheduleRoutes(router, controlScheduleHandler)
 	routes.SetupHemodialysisScheduleRoutes(router, hemodialysisScheduleHandler)
 	routes.SetupFluidBalanceRoutes(router, fluidBalanceHandler)
-	routes.SetupHemodialysisMonitoringRoutes(router,hemodialysisMonitoringHandler)
+	routes.SetupHemodialysisMonitoringRoutes(router, hemodialysisMonitoringHandler)
 	routes.SetupProfileRoutes(router, profileHandler)
 	routes.SetupComplaintRoutes(router, complaintHandler)
 	routes.SetupMedicationRefillRoutes(router, medicationReffilHandler)

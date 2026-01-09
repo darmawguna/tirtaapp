@@ -17,7 +17,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"name\": \"Darma wiguna\",\r\n    \"email\": \"darmawiguna@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"timezone\": \"Asia/Makassar\",\r\n    \"phone_number\" : \"085855193929\",\r\n    \"role\" : \"user\"\r\n}",
+              "raw": "{\r\n    \"name\": \"Darma wiguna\",\r\n    \"email\": \"komangagus642@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"timezone\": \"Asia/Makassar\",\r\n    \"phone_number\" : \"085855193929\",\r\n    \"role\" : \"user\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -76,7 +76,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"admin@tirtha.com\",\r\n    \"password\": \"tirtha10272025\",\r\n    \"fcm_token\":\"3c2N1TVx4TlW-INDBfnT_DZ:APA91bGFaNfGz5bTKUDtczU8OJODS_j-I5zCml27Gih-6F6b1ZWS8djJYYo6BUv7t6yQNedOIHKaAmdKnJxrCCRS9D1uBNfFEh2DSOHoWVErlXo5i9qr4C0\",\r\n    \"timezone\" : \"Asia/Jakarta\"\r\n}"
+              "raw": "{\r\n    \"email\": \"komangagus642@gmail.com\",\r\n    \"password\": \"darmawiguna\",\r\n    \"fcm_token\":\"3c2N1TVx4TlW-INDBfnT_DZ:APA91bGFaNfGz5bTKUDtczU8OJODS_j-I5zCml27Gih-6F6b1ZWS8djJYYo6BUv7t6yQNedOIHKaAmdKnJxrCCRS9D1uBNfFEh2DSOHoWVErlXo5i9qr4C0\",\r\n    \"timezone\" : \"Asia/Jakarta\"\r\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
@@ -86,6 +86,62 @@
               "path": [
                 "auth",
                 "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "id": "19e5e4f5-dc19-478e-9ebf-94a3d24642e9",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"komangagus642@gmail.com\" }\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "id": "4ca7c475-68b7-4e30-8f55-61d9fa98861e",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"token\": \"0fa638ce2c50d958b9b6f25568a39cdb39f74b475598417a6bfc5a533d9b769c\", \"password\": \"darmawiguna\" }\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
               ]
             }
           },
@@ -1387,7 +1443,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{jwt_token}}",
                   "type": "string"
                 }
               ]
