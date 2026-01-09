@@ -105,6 +105,7 @@ func main() {
 	router := gin.Default()
 	router.Static("/static/profiles", "./uploads/profiles")
 	router.Static("/static/educations", "./uploads/educations")
+	router.StaticFile("/.well-known/assetlinks.json", ".well-known/assetlinks.json")
 
 	// Mendaftarkan semua routes
 	routes.SetupAuthRoutes(router, authHandler, passwordResetHandler)
