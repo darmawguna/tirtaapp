@@ -6,12 +6,15 @@ import (
 )
 
 // SetupAuthRoutes mendaftarkan semua route yang berhubungan dengan autentikasi.
-func SetupAuthRoutes(router *gin.Engine, authHandler *handlers.AuthHandler) {
+func SetupAuthRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, prHandler *handlers.PasswordResetHandler) {
 	// Grouping route untuk /auth
 	authRoutes := router.Group("/api/v1/auth")
 	{
 		authRoutes.POST("/register", authHandler.Register)
 		authRoutes.POST("/login", authHandler.Login)
 		// Nanti route /login akan kita tambahkan di sini
+
+		authRoutes.POST("/forgot-password", prHandler.ForgotPassword)
+		authRoutes.POST("/reset-password", prHandler.ResetPassword)
 	}
 }
