@@ -117,7 +117,7 @@ func (s *passwordResetService) ForgotPassword(email string) error {
 
 	<p>Hormat kami,<br>
 	<b>Tirta App</b></p>
-`, expMin, resetLink, token)
+`, expMin, resetLink, resetLink)
 
 	return s.mailer.Send(user.Email, subject, body)
 }
