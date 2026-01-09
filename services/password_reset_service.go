@@ -80,7 +80,7 @@ func (s *passwordResetService) ForgotPassword(email string) error {
 
 	deepLinkBase := os.Getenv("APP_DEEPLINK_BASE")
 	if deepLinkBase == "" {
-		deepLinkBase = "tirtaapp://reset-password?token="
+		deepLinkBase = "https://tirtapp.fmews.com/reset-password?token="
 	}
 	resetLink := deepLinkBase + token
 
