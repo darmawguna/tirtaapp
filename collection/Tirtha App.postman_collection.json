@@ -1,1371 +1,1605 @@
 {
-	"info": {
-		"_postman_id": "191545f5-f880-4e22-9205-acbe6a3ebbdd",
-		"name": "Tirtha App",
-		"description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "31404082",
-		"_collection_link": "https://darmws.postman.co/workspace/Freelance~15f476a9-79fc-42f5-9332-c86a2781e986/collection/31404082-191545f5-f880-4e22-9205-acbe6a3ebbdd?action=share&source=collection_link&creator=31404082"
-	},
-	"item": [
-		{
-			"name": "Authentication",
-			"item": [
-				{
-					"name": "Register",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Darma wiguna\",\r\n    \"email\": \"darmawiguna@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"timezone\": \"Asia/Makassar\",\r\n    \"phone_number\" : \"085855193929\",\r\n    \"role\" : \"user\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/auth/register",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"register"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"const response = pm.response.json();\r",
-									"if (response.token) {\r",
-									"    pm.environment.set(\"token_jwt\", response.token);\r",
-									"    console.log(\"JWT Token saved to environment.\");\r",
-									"    console.log(token_jwt);\r",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"admin@tirtha.com\",\r\n    \"password\": \"tirtha10272025\",\r\n    \"fcm_token\":\"3c2N1TVx4TlW-INDBfnT_DZ:APA91bGFaNfGz5bTKUDtczU8OJODS_j-I5zCml27Gih-6F6b1ZWS8djJYYo6BUv7t6yQNedOIHKaAmdKnJxrCCRS9D1uBNfFEh2DSOHoWVErlXo5i9qr4C0\",\r\n    \"timezone\" : \"Asia/Jakarta\"\r\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/auth/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"login"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Quiz",
-			"item": [
-				{
-					"name": "Create Quiz",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Kuis Kesehatan Mental Dasar\",\r\n    \"url\": \"https://forms.gle/contoh12345\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/quizzes",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"quizzes"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Quiz",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Kuis Kesehatan Mental (Diperbarui)\",\r\n    \"url\": \"https://forms.gle/contohLain9876\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/quizzes/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"quizzes",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"Kuis Kesehatan Mental (Diperbarui)\",\r\n    \"url\": \"https://forms.gle/contohLain9876\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/quizzes/11",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"quizzes",
-								"11"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Quiz",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/quizzes",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"quizzes"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Quiz by Id",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/quizzes/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"quizzes",
-								"1"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Education",
-			"item": [
-				{
-					"name": "Create Education",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "name",
-									"value": "belajar mengelola stress Terbaru",
-									"type": "text"
-								},
-								{
-									"key": "url",
-									"value": "https://www.google.com/url?sa=E&source=gmail&q=https://www.youtube.com/watch?v=abc123",
-									"type": "text"
-								},
-								{
-									"key": "thumbnail",
-									"type": "file",
-									"src": "postman-cloud:///1ee9f07a-f2af-46c0-9fa9-64f7b611eb63"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/educations",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"educations"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Education",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "name",
-									"value": "belajar mengelola stress Terbaru",
-									"type": "text"
-								},
-								{
-									"key": "url",
-									"value": "https://www.google.com/url?sa=E&source=gmail&q=https://www.youtube.com/watch?v=abc123",
-									"type": "text"
-								},
-								{
-									"key": "thumbnail",
-									"type": "file",
-									"src": "postman-cloud:///1ee9f07a-f2af-46c0-9fa9-64f7b611eb63"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/educations/3",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"educations",
-								"3"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/educations",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"educations"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get by Id",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/educations/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"educations",
-								"1"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Complaint",
-			"item": [
-				{
-					"name": "Create Complaint",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"complaints\": []\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/complaints",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"complaints"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get My Complaints",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/complaints",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"complaints"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get My Complaint by Id",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/complaints/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"complaints",
-								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Drug Schedule",
-			"item": [
-				{
-					"name": "Create",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"drug_name\": \"Obat Tes Sore Revisi\", \"dose\": \"1\",\r\n    \"schedule_date\": \"2025-10-23\", \"at_18\": true\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/drug-schedules",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"drug-schedules"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"drug_name\": \"Obat Tes Sore Revisi\", \"dose\": \"1\",\r\n    \"schedule_date\": \"2025-10-23\", \"at_18\": true\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/drug-schedules",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"drug-schedules"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get by Id",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"drug_name\": \"Obat Tes Sore Revisi\", \"dose\": \"1\",\r\n    \"schedule_date\": \"2025-10-23\", \"at_18\": true\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/drug-schedules",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"drug-schedules"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Control Schedule",
-			"item": [
-				{
-					"name": "Create Control Schedule",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{ \"control_date\": \"2025-10-24\" }"
-						},
-						"url": {
-							"raw": "{{base_url}}/control-schedules",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"control-schedules"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{ \"control_date\": \"2025-10-24\" }"
-						},
-						"url": {
-							"raw": "{{base_url}}/control-schedules",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"control-schedules"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Pemantauan Cairan",
-			"item": [
-				{
-					"name": "Menambahkan cairan",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"intake_cc\": 300,\r\n    \"output_cc\": 0\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{base_url}}/fluids",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"fluids"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get History",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/fluids",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"fluids"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Jadwal Hemodialisa",
-			"item": [
-				{
-					"name": "Create Schedule Hemodialisa",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{ \"schedule_date\": \"2025-10-24\" }"
-						},
-						"url": {
-							"raw": "{{base_url}}/hemodialysis-schedules",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"hemodialysis-schedules"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{ \"schedule_date\": \"2025-10-23\" }"
-						},
-						"url": {
-							"raw": "{{base_url}}/hemodialysis-schedules",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"hemodialysis-schedules"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Hemodialisis Monitoring",
-			"item": [
-				{
-					"name": "Create monitoring",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"bp_before\": \"140/90\",\r\n    \"bp_after\": \"130/85\",\r\n    \"weight_before\": 68.5,\r\n    \"weight_after\": 66.0\r\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/hemodialysis-monitoring",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"hemodialysis-monitoring"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get History",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/hemodialysis-monitoring/history",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"hemodialysis-monitoring",
-								"history"
-							]
-						}
-					},
-					"response": [
-						{
-							"name": "Get History",
-							"originalRequest": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{base_url}}/hemodialysis-monitoring/history",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"hemodialysis-monitoring",
-										"history"
-									]
-								}
-							},
-							"_postman_previewlanguage": null,
-							"header": null,
-							"cookie": [],
-							"body": null
-						}
-					]
-				},
-				{
-					"name": "Get History Copy",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/hemodialysis-monitoring/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"hemodialysis-monitoring",
-								"1"
-							]
-						}
-					},
-					"response": [
-						{
-							"name": "Get History",
-							"originalRequest": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{base_url}}/hemodialysis-monitoring/history",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"hemodialysis-monitoring",
-										"history"
-									]
-								}
-							},
-							"_postman_previewlanguage": null,
-							"header": null,
-							"cookie": [],
-							"body": null
-						}
-					]
-				}
-			]
-		},
-		{
-			"name": "Profile",
-			"item": [
-				{
-					"name": "Profile",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {},
-								"requests": {}
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/profile",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"profile"
-							]
-						},
-						"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
-					},
-					"response": []
-				},
-				{
-					"name": "Update",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "name",
-									"value": "Darma Wiguna",
-									"type": "text"
-								},
-								{
-									"key": "profile_picture",
-									"type": "file",
-									"src": "postman-cloud:///1ee9f07a-f1f5-4e00-9948-c473acf0bd06"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{base_url}}/profile",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"profile"
-							]
-						}
-					},
-					"response": [
-						{
-							"name": "Update Name only",
-							"originalRequest": {
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"name\": \"Nama user Baru\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{base_url}}/profile",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"profile"
-									]
-								}
-							},
-							"_postman_previewlanguage": null,
-							"header": null,
-							"cookie": [],
-							"body": null
-						},
-						{
-							"name": "Update Password",
-							"originalRequest": {
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"password\": \"password123\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{base_url}}/profile",
-									"host": [
-										"{{base_url}}"
-									],
-									"path": [
-										"profile"
-									]
-								}
-							},
-							"_postman_previewlanguage": null,
-							"header": null,
-							"cookie": [],
-							"body": null
-						}
-					]
-				},
-				{
-					"name": "Get All user by ID",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{admin_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/admin/users/count",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"admin",
-								"users",
-								"count"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Obat Abis",
-			"item": [
-				{
-					"name": "Buat Jadwal",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/medication-refills",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"medication-refills"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Jadwal",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"refill_date\": \"2025-11-10\",\r\n    \"is_active\": true\r\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/medication-refills/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"medication-refills",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/medication-refills/",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"medication-refills",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get by Id",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/medication-refills/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"medication-refills",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Data",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{user_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/medication-refills/1",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"medication-refills",
-								"1"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"requests": {},
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"requests": {},
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "id",
-			"value": "1"
-		},
-		{
-			"key": "base_url",
-			"value": "https://template.postman-echo.com"
-		},
-		{
-			"key": "token_jwt",
-			"value": ""
-		},
-		{
-			"key": "admin_token",
-			"value": ""
-		},
-		{
-			"key": "quiz_id",
-			"value": ""
-		},
-		{
-			"key": "user_token",
-			"value": ""
-		},
-		{
-			"key": "education_id",
-			"value": "",
-			"type": "default"
-		},
-		{
-			"key": "hd_schedule_id",
-			"value": "",
-			"type": "default"
-		}
-	]
+  "info": {
+    "_postman_id": "191545f5-f880-4e22-9205-acbe6a3ebbdd",
+    "name": "Tirtha App",
+    "description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "id": "0fac62d1-e16a-4b3e-9304-9979d503315e",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Darma wiguna\",\r\n    \"email\": \"darmawiguna@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"timezone\": \"Asia/Makassar\",\r\n    \"phone_number\" : \"085855193929\",\r\n    \"role\" : \"user\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "0ccd1797-6ceb-4055-a8e1-edb2c931dca9",
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "if (response.token) {\r",
+                  "    pm.environment.set(\"token_jwt\", response.token);\r",
+                  "    console.log(\"JWT Token saved to environment.\");\r",
+                  "    console.log(token_jwt);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "ccdf3f07-b207-4e15-898d-4e8699a7f939",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "65b663a6-b59a-4cdb-9c8c-2c1d72e63c69",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"admin@tirtha.com\",\r\n    \"password\": \"tirtha10272025\",\r\n    \"fcm_token\":\"3c2N1TVx4TlW-INDBfnT_DZ:APA91bGFaNfGz5bTKUDtczU8OJODS_j-I5zCml27Gih-6F6b1ZWS8djJYYo6BUv7t6yQNedOIHKaAmdKnJxrCCRS9D1uBNfFEh2DSOHoWVErlXo5i9qr4C0\",\r\n    \"timezone\" : \"Asia/Jakarta\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "a981188e-d67c-4321-ab68-118d62e62af3"
+    },
+    {
+      "name": "Quiz",
+      "item": [
+        {
+          "name": "Create Quiz",
+          "id": "3b4f4fa5-edb7-412a-894d-1f0fadc3c14c",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Kuis Kesehatan Mental Dasar\",\r\n    \"url\": \"https://forms.gle/contoh12345\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/quizzes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "quizzes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Quiz",
+          "id": "674c1d88-584c-4b8f-a840-f11c537e70ba",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Kuis Kesehatan Mental (Diperbarui)\",\r\n    \"url\": \"https://forms.gle/contohLain9876\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/quizzes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "quizzes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete",
+          "id": "8b2d7e08-7245-429c-93c2-487f407d681b",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"Kuis Kesehatan Mental (Diperbarui)\",\r\n    \"url\": \"https://forms.gle/contohLain9876\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/quizzes/11",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "quizzes",
+                "11"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Quiz",
+          "id": "5ab3f212-ba00-4343-95f2-2f630014b45e",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/quizzes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "quizzes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Quiz by Id",
+          "id": "edd4a890-5f14-4a8b-af1b-c30aca4fcd80",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/quizzes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "quizzes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "fecb70a9-7ddf-47fd-a74f-1aa242d15347"
+    },
+    {
+      "name": "Education",
+      "item": [
+        {
+          "name": "Create Education",
+          "id": "249114fe-5138-4b37-bcfe-cffc3bae1731",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "belajar mengelola stress Terbaru",
+                  "type": "text"
+                },
+                {
+                  "key": "url",
+                  "value": "https://www.google.com/url?sa=E&source=gmail&q=https://www.youtube.com/watch?v=abc123",
+                  "type": "text"
+                },
+                {
+                  "key": "thumbnail",
+                  "type": "file",
+                  "src": [
+                    "postman-cloud:///1ee9f07a-f2af-46c0-9fa9-64f7b611eb63"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/educations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "educations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Education",
+          "id": "bcbc3fbd-d61d-400e-bd95-2a55ec84bb1f",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "belajar mengelola stress Terbaru",
+                  "type": "text"
+                },
+                {
+                  "key": "url",
+                  "value": "https://www.google.com/url?sa=E&source=gmail&q=https://www.youtube.com/watch?v=abc123",
+                  "type": "text"
+                },
+                {
+                  "key": "thumbnail",
+                  "type": "file",
+                  "src": [
+                    "postman-cloud:///1ee9f07a-f2af-46c0-9fa9-64f7b611eb63"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/educations/3",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "educations",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All",
+          "id": "916b5a5c-45dd-4ee8-ae13-3533e470581a",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/educations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "educations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get by Id",
+          "id": "73c67ee4-ed37-4e7a-8817-aac390d04165",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/educations/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "educations",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "57228819-48ac-44bd-908a-463ed5f550a5"
+    },
+    {
+      "name": "Complaint",
+      "item": [
+        {
+          "name": "Create Complaint",
+          "id": "f0828aef-3014-4d2b-937e-f9c74270ec2b",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"complaints\": []\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/complaints",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaints"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Complaints",
+          "id": "edff0eba-8684-4019-b719-ed47c8bab4ea",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/complaints",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaints"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Complaint by Id",
+          "id": "dd49add5-d2ee-4345-ae81-410cf179d5b8",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/complaints/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaints",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "5071952f-e338-43ce-8b96-14334feb670b"
+    },
+    {
+      "name": "Drug Schedule",
+      "item": [
+        {
+          "name": "Create",
+          "id": "854eb992-1274-42c3-85ff-8c86af999bef",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"drug_name\": \"Obat Tes Sore Revisi\", \"dose\": \"1\",\r\n    \"schedule_date\": \"2025-10-23\", \"at_18\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/drug-schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "drug-schedules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All",
+          "id": "90fcaeab-03e7-40cf-8ffb-781fa7621781",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"drug_name\": \"Obat Tes Sore Revisi\", \"dose\": \"1\",\r\n    \"schedule_date\": \"2025-10-23\", \"at_18\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/drug-schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "drug-schedules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get by Id",
+          "id": "e2d0d9d6-32ff-4611-899e-a630e7165074",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"drug_name\": \"Obat Tes Sore Revisi\", \"dose\": \"1\",\r\n    \"schedule_date\": \"2025-10-23\", \"at_18\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/drug-schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "drug-schedules"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "491f58d7-5f66-4eff-b41f-d120683caa7f"
+    },
+    {
+      "name": "Control Schedule",
+      "item": [
+        {
+          "name": "Create Control Schedule",
+          "id": "0dc7d624-3f9f-4a91-b3bc-323fb65969f4",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"control_date\": \"2025-10-24\" }"
+            },
+            "url": {
+              "raw": "{{base_url}}/control-schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "control-schedules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All",
+          "id": "31dd13ff-2a6b-4fda-9d78-ed19344f402f",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"control_date\": \"2025-10-24\" }"
+            },
+            "url": {
+              "raw": "{{base_url}}/control-schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "control-schedules"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "5787cdbe-462c-4d6a-aabd-8fa243b67bb3"
+    },
+    {
+      "name": "Pemantauan Cairan",
+      "item": [
+        {
+          "name": "Menambahkan cairan",
+          "id": "6697fed1-a97b-41c0-af37-922a3a49b768",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"intake_cc\": 300,\r\n    \"output_cc\": 0\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/fluids",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "fluids"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get History",
+          "id": "55b0589c-a30c-4018-b42e-f187250a75de",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/fluids",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "fluids"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "6bc3c502-30a2-4f17-ae53-8f54635bdf17"
+    },
+    {
+      "name": "Jadwal Hemodialisa",
+      "item": [
+        {
+          "name": "Create Schedule Hemodialisa",
+          "id": "2cc1855e-c7d6-4f05-8b1b-ddde3dd48dc0",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"schedule_date\": \"2025-10-24\" }"
+            },
+            "url": {
+              "raw": "{{base_url}}/hemodialysis-schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hemodialysis-schedules"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All",
+          "id": "f42852d3-bed3-46d2-bb25-3fcbed1af291",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"schedule_date\": \"2025-10-23\" }"
+            },
+            "url": {
+              "raw": "{{base_url}}/hemodialysis-schedules",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hemodialysis-schedules"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "9b2c4312-75c9-427e-ac45-6e4ea572da7c"
+    },
+    {
+      "name": "Hemodialisis Monitoring",
+      "item": [
+        {
+          "name": "Create monitoring",
+          "id": "4b84277b-3eec-4ada-9d9e-0eb64dd1c913",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"bp_before\": \"140/90\",\r\n    \"bp_after\": \"130/85\",\r\n    \"weight_before\": 68.5,\r\n    \"weight_after\": 66.0\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/hemodialysis-monitoring",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hemodialysis-monitoring"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get History",
+          "id": "dc43c2e9-a544-4234-a969-6d99a2a5d334",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hemodialysis-monitoring/history",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hemodialysis-monitoring",
+                "history"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "7372eac5-b039-4e66-b291-5e55006cdbc8",
+              "name": "Get History",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/hemodialysis-monitoring/history",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "hemodialysis-monitoring",
+                    "history"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "Text",
+              "header": null,
+              "cookie": [],
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "Get History Copy",
+          "id": "67b769b8-4711-4592-96c9-ec08535f3b2d",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/hemodialysis-monitoring/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "hemodialysis-monitoring",
+                "1"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "d5634d87-856b-476b-b615-044c4c06bed4",
+              "name": "Get History",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/hemodialysis-monitoring/history",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "hemodialysis-monitoring",
+                    "history"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "Text",
+              "header": null,
+              "cookie": [],
+              "body": null
+            }
+          ]
+        }
+      ],
+      "id": "90ebcef1-292b-49a2-879e-e36b34ad834e"
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "0f653b00-5375-4f4f-81ec-874a89198516",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "profile"
+              ]
+            },
+            "description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+          },
+          "response": []
+        },
+        {
+          "name": "Update",
+          "id": "19498b04-3b7e-4db1-85e0-18f857fac68f",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Darma Wiguna",
+                  "type": "text"
+                },
+                {
+                  "key": "profile_picture",
+                  "type": "file",
+                  "src": [
+                    "postman-cloud:///1ee9f07a-f1f5-4e00-9948-c473acf0bd06"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "profile"
+              ]
+            }
+          },
+          "response": [
+            {
+              "id": "05b987a4-dc37-42f3-9717-704d7ed171fd",
+              "name": "Update Name only",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": \"Nama user Baru\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/profile",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "profile"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "Text",
+              "header": null,
+              "cookie": [],
+              "body": null
+            },
+            {
+              "id": "fcf2cdb1-4f13-4374-a3ed-b8e8d76ed3d5",
+              "name": "Update Password",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"password\": \"password123\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/profile",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "profile"
+                  ]
+                }
+              },
+              "_postman_previewlanguage": "Text",
+              "header": null,
+              "cookie": [],
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "Get All user by ID",
+          "id": "9f0270bf-691f-4b38-91ec-4ea5adcd2a5c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/users/count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "count"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "c64625a6-7cba-4937-b880-d14688226f96"
+    },
+    {
+      "name": "Obat Abis",
+      "item": [
+        {
+          "name": "Buat Jadwal",
+          "id": "5029c1f4-27b1-41b6-9761-ea75fbdef040",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/medication-refills",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medication-refills"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Jadwal",
+          "id": "b0667208-8ef6-4397-a53c-e41aeafe3450",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"refill_date\": \"2025-11-10\",\r\n    \"is_active\": true\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/medication-refills/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medication-refills",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All",
+          "id": "13fa226c-c370-4d1c-84b8-dc8250bcec1f",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/medication-refills/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medication-refills",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get by Id",
+          "id": "8c41bdc4-2f0b-461d-8f37-36477a2b1ac5",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/medication-refills/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medication-refills",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Data",
+          "id": "8d3f7de6-2871-4a13-be06-7f84a3a8a71b",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"refill_date\": \"2025-11-20\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/medication-refills/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "medication-refills",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "2262bc04-6d3f-4b97-b112-47354ce0efeb"
+    },
+    {
+      "name": "Complaint v2",
+      "item": [
+        {
+          "name": "Create Complaint pre_hd",
+          "id": "1929c23b-5593-4659-b7f1-48b0354583b3",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"phase\": \"pre_hd\",\r\n  \"complaints\": [\"pusing\"],\r\n  \"other_text\": null\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/complaints",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaints"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Complaints",
+          "id": "412891dc-0236-4902-998f-040cbbaa8d63",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/complaints?phase=post_hd",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaints"
+              ],
+              "query": [
+                {
+                  "key": "phase",
+                  "value": "post_hd",
+                  "description": "isi antara pre_hd / post_hd",
+                  "uuid": "9407797f-49d7-44c3-9559-492d2a366595"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Complaint by Id",
+          "id": "c565e6eb-c8d1-4a72-8436-cb6a339821dc",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/complaints/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaints",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Complaint post_hd",
+          "id": "11c9b5c6-0650-474c-8e3e-8fea6ac3906d",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"phase\": \"post_hd\",\r\n  \"complaints\": [\"pusing\", \"mual_muntah\"],\r\n  \"other_text\": null\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/complaints",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaints"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Complaint with other text",
+          "id": "4f55cdc2-5c7d-42b0-aac7-abd379150b3f",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{user_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"phase\": \"pre_hd\",\r\n  \"complaints\": [\"keluhan_lainnya\"],\r\n  \"other_text\": \"Saya merasa aneh\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/complaints",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "complaints"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "3cfc46f3-23ac-4629-831f-fde91fc791fb"
+    }
+  ],
+  "variable": [
+    {
+      "id": "486e8557-f413-4d0d-9498-3c21c5814568",
+      "key": "id",
+      "value": "1"
+    },
+    {
+      "id": "f935f03f-0234-41e9-83d6-d4fa750b8a9d",
+      "key": "base_url",
+      "value": "https://template.postman-echo.com"
+    },
+    {
+      "id": "92617f4d-55c7-4ec6-ab52-25e62c8a3718",
+      "key": "token_jwt",
+      "value": ""
+    },
+    {
+      "id": "eab7e476-9c1f-4da9-8202-c3ece6521035",
+      "key": "admin_token",
+      "value": ""
+    },
+    {
+      "id": "05522be3-8b40-42cd-99b3-33c8313a77ce",
+      "key": "quiz_id",
+      "value": ""
+    },
+    {
+      "id": "b76ba2c2-94aa-4812-b415-d58d4319a929",
+      "key": "user_token",
+      "value": ""
+    },
+    {
+      "id": "ccdd4ced-16d4-43bf-be6b-879fbfab07e8",
+      "key": "education_id",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "id": "aee87b8e-55ce-4c97-a492-1dd153d09eb0",
+      "key": "hd_schedule_id",
+      "value": "",
+      "type": "default"
+    }
+  ]
 }
