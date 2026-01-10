@@ -30,11 +30,13 @@ RUN groupadd --system nonroot && \
 WORKDIR /app
 
 COPY --from=builder /out/tirtapp-api /app/tirtapp-api
+COPY .well-known /app/.well-known
 
 RUN chown -R nonroot:nonroot /app
 RUN mkdir -p /app/uploads/educations && \
     mkdir -p /app/uploads/profiles && \
     chown -R nonroot:nonroot /app/uploads
+RUN chmod -R a+rX /app/.well-known
 
 ENV GIN_MODE=release
 EXPOSE 8080
