@@ -2,9 +2,9 @@
   {
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
-      "namespace": "",
-      "package_name": "",
-      "sha256_cert_fingerprints": [""]
+      "namespace": "android_app",
+      "package_name": "com.example.tirtha_app",
+      "sha256_cert_fingerprints": ["CB:6F:50:A8:44:79:CD:A3:5D:39:07:78:A6:67:24:11:F0:DE:67:AD:81:CD:81:09:43:AE:03:25:82:FA:67:06"]
     }
   }
 ]
