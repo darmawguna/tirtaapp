@@ -5,6 +5,7 @@ import (
 
 	"github.com/darmawguna/tirtaapp.git/dto" // Sesuaikan path
 	models "github.com/darmawguna/tirtaapp.git/model"
+	"github.com/darmawguna/tirtaapp.git/repositories"
 	"github.com/darmawguna/tirtaapp.git/services"
 	"github.com/darmawguna/tirtaapp.git/utils"
 	"github.com/gin-gonic/gin"
@@ -12,10 +13,17 @@ import (
 
 type FluidBalanceHandler struct {
 	service services.FluidBalanceService
+	userRepo repositories.UserRepository
 }
 
-func NewFluidBalanceHandler(service services.FluidBalanceService) *FluidBalanceHandler {
-	return &FluidBalanceHandler{service: service}
+func NewFluidBalanceHandler(
+	service services.FluidBalanceService,
+	userRepo repositories.UserRepository,
+) *FluidBalanceHandler {
+	return &FluidBalanceHandler{
+		service:  service,
+		userRepo: userRepo,
+	}
 }
 
 func toFluidBalanceResponse(log models.FluidBalanceLog) dto.FluidBalanceLogResponseDTO {
@@ -37,8 +45,19 @@ func (h *FluidBalanceHandler) CreateOrUpdate(c *gin.Context) {
 		return
 	}
 
-	userID := c.MustGet("userID").(float64)
-	logEntry, err := h.service.CreateOrUpdateLog(uint(userID), input)
+	rawUserID := c.MustGet("userID").(float64)
+	userID := uint(rawUserID)
+
+	// ===============================
+	// 2. QUERY USER (WAJIB)
+	// ===============================
+	user, err := h.userRepo.FindByID(userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound,
+			utils.ErrorResponse("User not found", err.Error()))
+		return
+	}
+	logEntry, err := h.service.CreateOrUpdateLog(user, input)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("Failed to save fluid log", err.Error()))
 		return

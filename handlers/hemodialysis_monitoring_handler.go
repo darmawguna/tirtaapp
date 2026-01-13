@@ -7,6 +7,7 @@ import (
 
 	"github.com/darmawguna/tirtaapp.git/dto"          // Adjust path
 	models "github.com/darmawguna/tirtaapp.git/model" // Adjust path
+	"github.com/darmawguna/tirtaapp.git/repositories"
 	"github.com/darmawguna/tirtaapp.git/services"
 	"github.com/darmawguna/tirtaapp.git/utils"
 	"github.com/gin-gonic/gin"
@@ -15,11 +16,12 @@ import (
 // HemodialysisMonitoringHandler mengelola request HTTP untuk pemantauan HD.
 type HemodialysisMonitoringHandler struct {
 	service services.HemodialysisMonitoringService
+	userRepo repositories.UserRepository
 }
 
 // NewHemodialysisMonitoringHandler adalah constructor.
-func NewHemodialysisMonitoringHandler(service services.HemodialysisMonitoringService) *HemodialysisMonitoringHandler {
-	return &HemodialysisMonitoringHandler{service: service}
+func NewHemodialysisMonitoringHandler(service services.HemodialysisMonitoringService, userRepo repositories.UserRepository,) *HemodialysisMonitoringHandler {
+	return &HemodialysisMonitoringHandler{service: service, userRepo: userRepo,}
 }
 
 // toHemodialysisMonitoringResponse mengonversi model ke DTO response.
@@ -45,10 +47,19 @@ func (h *HemodialysisMonitoringHandler) Create(c *gin.Context) {
 	}
 
 	// Ambil userID dari context (dari AuthMiddleware)
-	userID := c.MustGet("userID").(float64)
+	rawUserID := c.MustGet("userID").(float64)
+	userID := uint(rawUserID)
 
-	// Panggil service untuk membuat atau memperbarui data hari ini
-	monitoring, err := h.service.CreateOrUpdateMonitoringForToday(uint(userID), input)
+	// ===============================
+	// 2. QUERY USER (WAJIB)
+	// ===============================
+	user, err := h.userRepo.FindByID(userID)
+	if err != nil {
+		c.JSON(http.StatusNotFound,
+			utils.ErrorResponse("User not found", err.Error()))
+		return
+	}
+	monitoring, err := h.service.CreateOrUpdateMonitoringForToday(user, input)
 	if err != nil {
 		// Tangani error spesifik dari service jika perlu (misal: duplikasi ditangani di repo/service)
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") { // Contoh error Postgres

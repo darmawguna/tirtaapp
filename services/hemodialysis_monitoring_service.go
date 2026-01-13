@@ -15,7 +15,7 @@ import (
 
 // Interface service
 type HemodialysisMonitoringService interface {
-	CreateOrUpdateMonitoringForToday(userID uint, input dto.CreateHemodialysisMonitoringDTO) (models.HemodialysisMonitoring, error)
+	CreateOrUpdateMonitoringForToday(user models.User, input dto.CreateHemodialysisMonitoringDTO) (models.HemodialysisMonitoring, error)
 	GetMonitoringHistory(userID uint) ([]models.HemodialysisMonitoring, error)
 	GetMonitoringByID(userID, monitoringID uint) (models.HemodialysisMonitoring, error)
 	// GetMonitoringByUserIDAndDate jika diperlukan
@@ -36,51 +36,64 @@ func NewHemodialysisMonitoringService(monitoringRepo repositories.HemodialysisMo
 }
 
 // CreateOrUpdateMonitoringForToday: Logika bisnis utama
-func (s *hemodialysisMonitoringService) CreateOrUpdateMonitoringForToday(userID uint, input dto.CreateHemodialysisMonitoringDTO) (models.HemodialysisMonitoring, error) {
-	// Gunakan UTC untuk konsistensi tanggal
-	nowUTC := time.Now().UTC()
-	todayUTC := time.Date(nowUTC.Year(), nowUTC.Month(), nowUTC.Day(), 0, 0, 0, 0, time.UTC)
+func (s *hemodialysisMonitoringService) CreateOrUpdateMonitoringForToday(
+	user models.User,
+	input dto.CreateHemodialysisMonitoringDTO,
+) (models.HemodialysisMonitoring, error) {
 
-	// Cari apakah data untuk hari ini sudah ada
-	existingMonitoring, err := s.monitoringRepo.FindByUserIDAndDate(userID, todayUTC)
+	// 1. Load timezone user
+	loc, err := time.LoadLocation(user.Timezone)
+	if err != nil {
+		return models.HemodialysisMonitoring{}, fmt.Errorf(
+			"invalid user timezone (%s): %w",
+			user.Timezone,
+			err,
+		)
+	}
 
-	var savedMonitoring models.HemodialysisMonitoring
-	var repoErr error
+	// 2. Hitung "hari ini" berdasarkan timezone user
+	nowUser := time.Now().In(loc)
+	todayUser := time.Date(
+		nowUser.Year(),
+		nowUser.Month(),
+		nowUser.Day(),
+		0, 0, 0, 0,
+		loc,
+	)
+
+	existing, err := s.monitoringRepo.FindByUserIDAndDate(
+		user.ID,
+		todayUser,
+	)
 
 	if err != nil {
-		// Jika error BUKAN karena tidak ditemukan, kembalikan error pencarian
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.HemodialysisMonitoring{}, fmt.Errorf("gagal mencari data monitoring hari ini: %w", err)
+			return models.HemodialysisMonitoring{}, fmt.Errorf(
+				"failed to check today's monitoring: %w",
+				err,
+			)
 		}
 
-		// --- BELUM ADA DATA HARI INI -> BUAT BARU ---
+		// --- BELUM ADA → CREATE ---
 		newMonitoring := models.HemodialysisMonitoring{
-			UserID:         userID,
-			MonitoringDate: todayUTC,
+			UserID:         user.ID,
+			MonitoringDate: todayUser,
 			BPBefore:       input.BPBefore,
 			BPAfter:        input.BPAfter,
 			WeightBefore:   input.WeightBefore,
 			WeightAfter:    input.WeightAfter,
 		}
-		savedMonitoring, repoErr = s.monitoringRepo.Create(newMonitoring)
-		if repoErr != nil {
-			return models.HemodialysisMonitoring{}, fmt.Errorf("gagal membuat data monitoring baru: %w", repoErr)
-		}
 
-	} else {
-		// --- SUDAH ADA DATA HARI INI -> UPDATE ---
-		existingMonitoring.BPBefore = input.BPBefore
-		existingMonitoring.BPAfter = input.BPAfter
-		existingMonitoring.WeightBefore = input.WeightBefore
-		existingMonitoring.WeightAfter = input.WeightAfter
-
-		savedMonitoring, repoErr = s.monitoringRepo.Update(existingMonitoring)
-		if repoErr != nil {
-			return models.HemodialysisMonitoring{}, fmt.Errorf("gagal memperbarui data monitoring: %w", repoErr)
-		}
+		return s.monitoringRepo.Create(newMonitoring)
 	}
 
-	return savedMonitoring, nil
+	// --- SUDAH ADA → UPDATE ---
+	existing.BPBefore = input.BPBefore
+	existing.BPAfter = input.BPAfter
+	existing.WeightBefore = input.WeightBefore
+	existing.WeightAfter = input.WeightAfter
+
+	return s.monitoringRepo.Update(existing)
 }
 
 // GetMonitoringHistory mengambil riwayat
