@@ -4,14 +4,12 @@ import (
 	// "errors" // Tidak perlu lagi di sini
 	// "fmt" // Tidak perlu lagi di sini
 
-	"time"
-
 	models "github.com/darmawguna/tirtaapp.git/model"
 	"gorm.io/gorm"
 )
 
 type FluidBalanceRepository interface {
-	 FindByUserAndDate(userID uint, logDate time.Time) (models.FluidBalanceLog, error)
+	 FindByUserAndDate(userID uint, logDate string) (models.FluidBalanceLog, error)
 	// Hapus Upsert
 	// Upsert(log models.FluidBalanceLog) (models.FluidBalanceLog, error)
 	Create(log models.FluidBalanceLog) (models.FluidBalanceLog, error) // <-- Tambah Create
@@ -29,14 +27,14 @@ func NewFluidBalanceRepository(db *gorm.DB) FluidBalanceRepository {
 
 // FindByUserAndDate: Tetap sama, gunakan DATE() SQL
 func (r *fluidBalanceRepository) FindByUserAndDate(
-	userID uint,
-	date time.Time,
+    userID uint,
+    logDate string, // Terima string "2006-01-02"
 ) (models.FluidBalanceLog, error) {
-	var log models.FluidBalanceLog
-	err := r.db.
-		Where("user_id = ? AND DATE(log_date) = DATE(?)", userID, date).
-		First(&log).Error
-	return log, err
+    var log models.FluidBalanceLog
+    err := r.db.
+        Where("user_id = ? AND DATE(log_date) = ?", userID, logDate).
+        First(&log).Error
+    return log, err
 }
 
 // [BARU] Create: Fungsi sederhana untuk INSERT
