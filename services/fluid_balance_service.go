@@ -16,7 +16,7 @@ const dailyIntakeLimit = 600
 const warningThreshold = 500
 
 type FluidBalanceService interface {
-	CreateOrUpdateLog( user models.User, input dto.CreateOrUpdateFluidLogDTO) (models.FluidBalanceLog, error)
+	CreateOrUpdateLog(user models.User, input dto.CreateOrUpdateFluidLogDTO) (models.FluidBalanceLog, error)
 	GetUserHistory(userID uint) ([]models.FluidBalanceLog, error)
 }
 
@@ -34,33 +34,22 @@ func (s *fluidBalanceService) CreateOrUpdateLog(
 	input dto.CreateOrUpdateFluidLogDTO,
 ) (models.FluidBalanceLog, error) {
 
-	// ===============================
-	// 1. Load timezone user
-	// ===============================
 	if user.Timezone == "" {
 		return models.FluidBalanceLog{}, fmt.Errorf("user timezone not set")
 	}
-
 	loc, err := time.LoadLocation(user.Timezone)
 	if err != nil {
 		return models.FluidBalanceLog{}, fmt.Errorf("invalid user timezone: %s", user.Timezone)
 	}
 
-	// ===============================
-	// 2. Tentukan HARI INI versi USER
-	// ===============================
-	now := time.Now().In(loc)
-	today := time.Date(
-		now.Year(),
-		now.Month(),
-		now.Day(),
+	today := time.Now().In(loc)
+	today = time.Date(
+		today.Year(),
+		today.Month(),
+		today.Day(),
 		0, 0, 0, 0,
 		loc,
 	)
-
-	// ===============================
-	// 3. Ambil nilai intake/output
-	// ===============================
 	intakeVal := 0
 	outputVal := 0
 
@@ -122,7 +111,6 @@ func (s *fluidBalanceService) CreateOrUpdateLog(
 
 	return s.repo.Update(existingLog)
 }
-
 
 func (s *fluidBalanceService) GetUserHistory(userID uint) ([]models.FluidBalanceLog, error) {
 	logs, err := s.repo.FindHistoryByUserID(userID, 7)

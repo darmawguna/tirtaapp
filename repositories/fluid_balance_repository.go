@@ -3,6 +3,7 @@ package repositories
 import (
 	// "errors" // Tidak perlu lagi di sini
 	// "fmt" // Tidak perlu lagi di sini
+
 	"time"
 
 	models "github.com/darmawguna/tirtaapp.git/model"
@@ -10,7 +11,7 @@ import (
 )
 
 type FluidBalanceRepository interface {
-	FindByUserAndDate(userID uint, date time.Time) (models.FluidBalanceLog, error)
+	 FindByUserAndDate(userID uint, logDate time.Time) (models.FluidBalanceLog, error)
 	// Hapus Upsert
 	// Upsert(log models.FluidBalanceLog) (models.FluidBalanceLog, error)
 	Create(log models.FluidBalanceLog) (models.FluidBalanceLog, error) // <-- Tambah Create
@@ -27,9 +28,14 @@ func NewFluidBalanceRepository(db *gorm.DB) FluidBalanceRepository {
 }
 
 // FindByUserAndDate: Tetap sama, gunakan DATE() SQL
-func (r *fluidBalanceRepository) FindByUserAndDate(userID uint, date time.Time) (models.FluidBalanceLog, error) {
+func (r *fluidBalanceRepository) FindByUserAndDate(
+	userID uint,
+	date time.Time,
+) (models.FluidBalanceLog, error) {
 	var log models.FluidBalanceLog
-	err := r.db.Where("user_id = ? AND DATE(log_date) = DATE(?)", userID, date.UTC()).First(&log).Error
+	err := r.db.
+		Where("user_id = ? AND DATE(log_date) = DATE(?)", userID, date).
+		First(&log).Error
 	return log, err
 }
 

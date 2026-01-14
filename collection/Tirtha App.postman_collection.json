@@ -39,44 +39,13 @@
         },
         {
           "name": "Login",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "id": "0ccd1797-6ceb-4055-a8e1-edb2c931dca9",
-                "exec": [
-                  "const response = pm.response.json();\r",
-                  "if (response.token) {\r",
-                  "    pm.environment.set(\"token_jwt\", response.token);\r",
-                  "    console.log(\"JWT Token saved to environment.\");\r",
-                  "    console.log(token_jwt);\r",
-                  "}"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            },
-            {
-              "listen": "prerequest",
-              "script": {
-                "id": "ccdf3f07-b207-4e15-898d-4e8699a7f939",
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
           "id": "65b663a6-b59a-4cdb-9c8c-2c1d72e63c69",
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"Tirthadigitaleducation@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"fcm_token\":\"3c2N1TVx4TlW-INDBfnT_DZ:APA91bGFaNfGz5bTKUDtczU8OJODS_j-I5zCml27Gih-6F6b1ZWS8djJYYo6BUv7t6yQNedOIHKaAmdKnJxrCCRS9D1uBNfFEh2DSOHoWVErlXo5i9qr4C0\",\r\n    \"timezone\" : \"Asia/Jakarta\"\r\n}"
+              "raw": "{\r\n    \"email\": \"komangagus642@gmail.com\",\r\n    \"password\": \"password\",\r\n    \"fcm_token\":\"3c2N1TVx4TlW-INDBfnT_DZ:APA91bGFaNfGz5bTKUDtczU8OJODS_j-I5zCml27Gih-6F6b1ZWS8djJYYo6BUv7t6yQNedOIHKaAmdKnJxrCCRS9D1uBNfFEh2DSOHoWVErlXo5i9qr4C0\",\r\n    \"timezone\" : \"Asia/Jakarta\"\r\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
@@ -127,7 +96,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{ \"token\": \"0fa638ce2c50d958b9b6f25568a39cdb39f74b475598417a6bfc5a533d9b769c\", \"password\": \"darmawiguna\" }\r\n",
+              "raw": "{ \"token\": \"c18c44ee5eddf7a61ba820bbf5b28d835002c7df68828a811799f272cc5dc199\", \"password\": \"darmawiguna\" }\r\n",
               "options": {
                 "raw": {
                   "language": "json"
@@ -142,6 +111,60 @@
               "path": [
                 "auth",
                 "reset-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login Copy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "0ccd1797-6ceb-4055-a8e1-edb2c931dca9",
+                "exec": [
+                  "const response = pm.response.json();\r",
+                  "if (response.token) {\r",
+                  "    pm.environment.set(\"token_jwt\", response.token);\r",
+                  "    console.log(\"JWT Token saved to environment.\");\r",
+                  "    console.log(token_jwt);\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "ccdf3f07-b207-4e15-898d-4e8699a7f939",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "968ea436-055f-42e8-aeb7-a19c6700cccd",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"wahyusasmita45@gmail.com\",\r\n    \"password\": \"70729604\",\r\n    \"fcm_token\":\"3c2N1TVx4TlW-INDBfnT_DZ:APA91bGFaNfGz5bTKUDtczU8OJODS_j-I5zCml27Gih-6F6b1ZWS8djJYYo6BUv7t6yQNedOIHKaAmdKnJxrCCRS9D1uBNfFEh2DSOHoWVErlXo5i9qr4C0\",\r\n    \"timezone\" : \"Asia/Jakarta\"\r\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
               ]
             }
           },
@@ -788,7 +811,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{jwt_token}}",
                   "type": "string"
                 }
               ]
@@ -797,7 +820,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"intake_cc\": 300,\r\n    \"output_cc\": 0\r\n}",
+              "raw": "{\r\n    \"intake_cc\": 300,\r\n    \"output_cc\": 100\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -825,7 +848,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{jwt_token}}",
                   "type": "string"
                 }
               ]
@@ -932,7 +955,7 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "{{user_token}}",
+                  "value": "{{jwt_token}}",
                   "type": "string"
                 }
               ]
@@ -1612,6 +1635,28 @@
         }
       ],
       "id": "3cfc46f3-23ac-4629-831f-fde91fc791fb"
+    },
+    {
+      "name": "New Request",
+      "id": "c93c1f6a-1caa-4859-ac0e-ba91fd7ae512",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://tirtapp.fmews.com/.well-known/assetlinks.json",
+          "protocol": "https",
+          "host": [
+            "tirtapp",
+            "fmews",
+            "com"
+          ],
+          "path": [
+            ".well-known",
+            "assetlinks.json"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "variable": [
