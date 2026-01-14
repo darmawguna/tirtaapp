@@ -12,22 +12,19 @@ import (
 )
 
 // ✅ DEMO MODE: Hard-code tanggal untuk sidang
-const DEMO_DATE_HEMODIALYSIS = "2026-01-14" // Ubah ini setelah sidang selesai
+const DEMO_DATE_HEMODIALYSIS = "2026-01-14"
 
-// Interface service
 type HemodialysisMonitoringService interface {
 	CreateOrUpdateMonitoringForToday(user models.User, input dto.CreateHemodialysisMonitoringDTO) (models.HemodialysisMonitoring, error)
 	GetMonitoringHistory(userID uint) ([]models.HemodialysisMonitoring, error)
 	GetMonitoringByID(userID, monitoringID uint) (models.HemodialysisMonitoring, error)
 }
 
-// Implementasi service
 type hemodialysisMonitoringService struct {
 	monitoringRepo repositories.HemodialysisMonitoringRepository
 	userRepo       repositories.UserRepository
 }
 
-// Constructor
 func NewHemodialysisMonitoringService(monitoringRepo repositories.HemodialysisMonitoringRepository, userRepo repositories.UserRepository) HemodialysisMonitoringService {
 	return &hemodialysisMonitoringService{
 		monitoringRepo: monitoringRepo,
@@ -35,7 +32,6 @@ func NewHemodialysisMonitoringService(monitoringRepo repositories.HemodialysisMo
 	}
 }
 
-// CreateOrUpdateMonitoringForToday: Logika bisnis utama
 func (s *hemodialysisMonitoringService) CreateOrUpdateMonitoringForToday(
 	user models.User,
 	input dto.CreateHemodialysisMonitoringDTO,
@@ -48,36 +44,35 @@ func (s *hemodialysisMonitoringService) CreateOrUpdateMonitoringForToday(
 		return models.HemodialysisMonitoring{}, fmt.Errorf("user timezone not set")
 	}
 
-	loc, err := time.LoadLocation(user.Timezone)
+	// loc, err := time.LoadLocation(user.Timezone)
+	// if err != nil {
+	// 	return models.HemodialysisMonitoring{}, fmt.Errorf(
+	// 		"invalid user timezone (%s): %w",
+	// 		user.Timezone,
+	// 		err,
+	// 	)
+	// }
+
+	// ===============================
+	// 2. ✅ DAPATKAN TANGGAL STRING (YYYY-MM-DD)
+	// ===============================
+	var todayStr string
+	
+	// PRODUCTION: Uncomment code di bawah
+	// nowInUserTZ := time.Now().In(loc)
+	// todayStr = nowInUserTZ.Format("2006-01-02")
+	
+	// ✅ DEMO MODE: Paksa tanggal
+	todayStr = DEMO_DATE_HEMODIALYSIS
+	
+	// Parse ke time.Time UTC midnight untuk disimpan ke database
+	todayDate, err := time.ParseInLocation("2006-01-02", todayStr, time.UTC)
 	if err != nil {
-		return models.HemodialysisMonitoring{}, fmt.Errorf(
-			"invalid user timezone (%s): %w",
-			user.Timezone,
-			err,
-		)
+		return models.HemodialysisMonitoring{}, fmt.Errorf("failed to parse date: %w", err)
 	}
 
 	// ===============================
-	// 2. ✅ GUNAKAN TANGGAL DEMO UNTUK SIDANG
-	// ===============================
-	// PRODUCTION: Uncomment code di bawah dan hapus DEMO_DATE_HEMODIALYSIS
-	// nowUser := time.Now().In(loc)
-	// todayUser := time.Date(
-	// 	nowUser.Year(),
-	// 	nowUser.Month(),
-	// 	nowUser.Day(),
-	// 	0, 0, 0, 0,
-	// 	loc,
-	// )
-
-	// ✅ DEMO MODE: Paksa tanggal ke 14 Januari 2026
-	todayUser, err := time.ParseInLocation("2006-01-02", DEMO_DATE_HEMODIALYSIS, loc)
-	if err != nil {
-		return models.HemodialysisMonitoring{}, fmt.Errorf("failed to parse demo date: %w", err)
-	}
-
-	// ===============================
-	// 3. Validasi Input (Opsional tapi bagus untuk production)
+	// 3. Validasi Input
 	// ===============================
 	if input.BPBefore == "" || input.BPAfter == "" {
 		return models.HemodialysisMonitoring{}, fmt.Errorf("tekanan darah sebelum dan sesudah harus diisi")
@@ -87,12 +82,9 @@ func (s *hemodialysisMonitoringService) CreateOrUpdateMonitoringForToday(
 	}
 
 	// ===============================
-	// 4. Cari Monitoring Hari Ini
+	// 4. ✅ CARI DENGAN STRING DATE
 	// ===============================
-	existing, err := s.monitoringRepo.FindByUserIDAndDate(
-		user.ID,
-		todayUser, // ✅ Akan selalu 2026-01-14
-	)
+	existing, err := s.monitoringRepo.FindByUserIDAndDateString(user.ID, todayStr)
 
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -107,7 +99,7 @@ func (s *hemodialysisMonitoringService) CreateOrUpdateMonitoringForToday(
 		// ===============================
 		newMonitoring := models.HemodialysisMonitoring{
 			UserID:         user.ID,
-			MonitoringDate: todayUser, // ✅ Akan selalu 2026-01-14
+			MonitoringDate: todayDate, // ✅ UTC midnight
 			BPBefore:       input.BPBefore,
 			BPAfter:        input.BPAfter,
 			WeightBefore:   input.WeightBefore,
@@ -128,15 +120,12 @@ func (s *hemodialysisMonitoringService) CreateOrUpdateMonitoringForToday(
 	return s.monitoringRepo.Update(existing)
 }
 
-// GetMonitoringHistory mengambil riwayat
 func (s *hemodialysisMonitoringService) GetMonitoringHistory(userID uint) ([]models.HemodialysisMonitoring, error) {
-	// ✅ Validasi limit
 	limit := 10
 	if limit <= 0 || limit > 100 {
-		limit = 10 // Default safe limit
+		limit = 10
 	}
 
-	// Ambil data terakhir
 	history, err := s.monitoringRepo.FindHistoryByUserID(userID, limit)
 	if err != nil {
 		return nil, fmt.Errorf("gagal mengambil riwayat monitoring: %w", err)
@@ -153,7 +142,6 @@ func (s *hemodialysisMonitoringService) GetMonitoringByID(userID, monitoringID u
 		return models.HemodialysisMonitoring{}, fmt.Errorf("gagal mencari data pemantauan: %w", err)
 	}
 
-	// ✅ Verifikasi kepemilikan untuk security
 	if monitoring.UserID != userID {
 		return models.HemodialysisMonitoring{}, errors.New("tidak berwenang mengakses data pemantauan ini")
 	}
