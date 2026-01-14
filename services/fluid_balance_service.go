@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/darmawguna/tirtaapp.git/dto" // Sesuaikan path
+	"github.com/darmawguna/tirtaapp.git/dto"
 	models "github.com/darmawguna/tirtaapp.git/model"
 	"github.com/darmawguna/tirtaapp.git/repositories"
 	"gorm.io/gorm"
@@ -14,6 +14,9 @@ import (
 // Definisikan batas cairan (bisa diambil dari config nantinya)
 const dailyIntakeLimit = 600
 const warningThreshold = 500
+
+// ✅ DEMO MODE: Hard-code tanggal untuk sidang
+const DEMO_DATE = "2026-01-14" // Ubah ini setelah sidang selesai
 
 type FluidBalanceService interface {
 	CreateOrUpdateLog(user models.User, input dto.CreateOrUpdateFluidLogDTO) (models.FluidBalanceLog, error)
@@ -34,22 +37,37 @@ func (s *fluidBalanceService) CreateOrUpdateLog(
 	input dto.CreateOrUpdateFluidLogDTO,
 ) (models.FluidBalanceLog, error) {
 
+	// ===============================
+	// 1. Validasi dan Load Timezone User
+	// ===============================
 	if user.Timezone == "" {
 		return models.FluidBalanceLog{}, fmt.Errorf("user timezone not set")
 	}
-	loc, err := time.LoadLocation(user.Timezone)
+	
+	// loc, err := time.LoadLocation(user.Timezone)
+	// if err != nil {
+	// 	return models.FluidBalanceLog{}, fmt.Errorf("invalid user timezone: %s", user.Timezone)
+	// }
+
+	// ===============================
+	// 2. ✅ GUNAKAN TANGGAL DEMO UNTUK SIDANG
+	// ===============================
+	// PRODUCTION: Uncomment code di bawah dan hapus DEMO_DATE
+	// nowInUserTZ := time.Now().In(loc)
+	// todayStr := nowInUserTZ.Format("2006-01-02")
+	
+	// ✅ DEMO MODE: Paksa tanggal ke 14 Januari 2026
+	todayStr := DEMO_DATE
+	
+	// Parse kembali ke time.Time untuk disimpan ke database (UTC midnight)
+	todayDate, err := time.Parse("2006-01-02", todayStr)
 	if err != nil {
-		return models.FluidBalanceLog{}, fmt.Errorf("invalid user timezone: %s", user.Timezone)
+		return models.FluidBalanceLog{}, fmt.Errorf("failed to parse date: %w", err)
 	}
 
-	today := time.Now().In(loc)
-	today = time.Date(
-		today.Year(),
-		today.Month(),
-		today.Day(),
-		0, 0, 0, 0,
-		loc,
-	)
+	// ===============================
+	// 3. Ambil Nilai Intake/Output
+	// ===============================
 	intakeVal := 0
 	outputVal := 0
 
@@ -61,12 +79,12 @@ func (s *fluidBalanceService) CreateOrUpdateLog(
 	}
 
 	// ===============================
-	// 4. Cari log hari ini
+	// 4. Cari Log Hari Ini (berdasarkan string date)
 	// ===============================
-	existingLog, err := s.repo.FindByUserAndDate(user.ID, today)
+	existingLog, err := s.repo.FindByUserAndDate(user.ID, todayStr)
 
 	// ===============================
-	// 5A. CREATE
+	// 5A. CREATE - Jika Log Belum Ada
 	// ===============================
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -75,7 +93,7 @@ func (s *fluidBalanceService) CreateOrUpdateLog(
 
 		newLog := models.FluidBalanceLog{
 			UserID:   user.ID,
-			LogDate:  today,
+			LogDate:  todayDate, // ✅ Akan selalu 2026-01-14
 			IntakeCC: intakeVal,
 			OutputCC: outputVal,
 		}
@@ -94,7 +112,7 @@ func (s *fluidBalanceService) CreateOrUpdateLog(
 	}
 
 	// ===============================
-	// 5B. UPDATE
+	// 5B. UPDATE - Jika Log Sudah Ada
 	// ===============================
 	existingLog.IntakeCC += intakeVal
 	existingLog.OutputCC += outputVal
